@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "njvm.h"
 
 
@@ -174,30 +175,38 @@ void executeProgram(int prog){
             case ADD:
                 {
                     IR++;
-                    int sum = stack[PC - 1] + stack [PC - 2];
-                    pop();
-                    pop();
-                    push(sum);
+                    {
+                        int sum;
+                        sum = stack[PC - 1] + stack [PC - 2];
+                        pop();
+                        pop();
+                        push(sum);
+                    }
                     break;
 
                 }
             case SUB:
                 {
                     IR++;
-                    int diff = stack[PC - 2] - stack [PC - 1];
-                    pop();
-                    pop();
-                    push(diff);
+                    {
+                        int diff;
+                        diff = stack[PC - 2] - stack [PC - 1];
+                        pop();
+                        pop();
+                        push(diff);
+                    }
                     break;
-
                 }
             case MUL:
                 {
                     IR++;
-                    int prod = stack[PC - 2] * stack [PC - 1];
-                    pop();
-                    pop();
-                    push(prod);
+                    {
+                        int prod;
+                        prod = stack[PC - 2] * stack [PC - 1];
+                        pop();
+                        pop();
+                        push(prod);
+                    }
                     break;
 
                 }
