@@ -26,6 +26,6 @@
 
 void printHelp(void);
 void listProgram(int prog);
-void executeProgram(int prog);
-void push();
+void executeProgram(unsigned int prog []);
+void push(int number);
 void pop();
