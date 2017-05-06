@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/lukas/CLionProjects/KsP/njvm.c
+stdio.h
+-
+string.h
+-
+stdlib.h
+-
+njvm.h
+/home/lukas/CLionProjects/KsP/njvm.h
+
+/home/lukas/CLionProjects/KsP/njvm.h
+

@@ -1,0 +1,1 @@
+/usr/bin/cc  -g   CMakeFiles/KsP.dir/njvm.c.o  -o KsP 

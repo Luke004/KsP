@@ -21,7 +21,7 @@ unsigned int program1 [] = {
     (WRCHR << 24),
     (HALT << 24)
 };
-int program1Length = 11;
+
 
 int main(int argc, char *argv [])
 {
@@ -46,16 +46,16 @@ int main(int argc, char *argv [])
         {
             printf("Ninja Virtual Machine started ...\n");
             listProgram(1);
-            executeProgram(1);
+            executeProgram(program1);
             printf("Ninja Virtual Machine stopped ...\n");
             exit(EXIT_SUCCESS);
         }
 	else if (strcmp(argv[i], ARG_PROG2) == 0){
-            printf("Es wurde prog2 ausgewählt");
+            printf("Es wurde prog2 ausgewï¿½hlt");
             exit(EXIT_SUCCESS);
 	}
 	else if (strcmp(argv[i], ARG_PROG3) == 0){
-            printf("Es wurde prog3 ausgewählt");
+            printf("Es wurde prog3 ausgewï¿½hlt");
             exit(EXIT_SUCCESS);
 	}
         else 
@@ -85,6 +85,7 @@ void listProgram(int prog){
     switch (prog){
         case 1:
         {
+            int program1Length = sizeof(program1)/ sizeof(program1[0]);
             while(IR < program1Length){
                 switch(program1[IR] >> 24){
                     case HALT:
@@ -185,14 +186,14 @@ void listProgram(int prog){
             }
 }
 
-void executeProgram(int prog){
+void executeProgram(unsigned int prog []){
     IR = 0;
     PC = 0;
-    while(program1[IR] != HALT << 24){
-        switch(program1[IR] >> 24){
+    while(prog[IR] != HALT << 24){
+        switch(prog[IR] >> 24){
             case PUSHC:
                 {
-                    push((SIGN_EXTEND(program1[IR] & 0x00FFFFFF)));
+                    push((SIGN_EXTEND(prog[IR] & 0x00FFFFFF)));
                     IR++;
                     break;
 
