@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "njvm.h"
 
 
@@ -22,35 +23,60 @@ unsigned int program1 [] = {
 };
 int program1Length = 11;
 
-int main(int argc, char *argv []){
-
-    if(argc == 1){
-            printf("Kein Kommando eingegeben\n");
-            printf("--help für eine Kommandoliste");
-            exit(99);
+int main(int argc, char *argv [])
+{
+    
+    /*manage parameter input */
+  {
+    int i;
+    i=1;
+    for(; i < argc; i++) 
+    {
+        if (strcmp(argv[i], ARG_VERSION) == 0) 
+        {
+            printf("Current Version: %d\n", NJVM_VERSION);
+            exit(EXIT_SUCCESS);
+        }
+        else if (strcmp(argv[i], ARG_HELP) == 0) 
+        {
+            printHelp();
+            exit(EXIT_SUCCESS);
+        }
+        else if (strcmp(argv[i], ARG_PROG1) == 0)
+        {
+            printf("Ninja Virtual Machine started ...\n");
+            listProgram(1);
+            executeProgram(1);
+            printf("Ninja Virtual Machine stopped ...\n");
+            exit(EXIT_SUCCESS);
+        }
+	else if (strcmp(argv[i], ARG_PROG2) == 0){
+            printf("Es wurde prog2 ausgewählt");
+            exit(EXIT_SUCCESS);
+	}
+	else if (strcmp(argv[i], ARG_PROG3) == 0){
+            printf("Es wurde prog3 ausgewählt");
+            exit(EXIT_SUCCESS);
+	}
+        else 
+        {
+            printf("unknown command line argument '%s' is not available, try %s %s\n", argv[i], argv[0], ARG_VERSION);
+            exit(EXIT_FAILURE);
+        }
     }
+  }
+  
+  exit(EXIT_SUCCESS);
+  
+}
 
-    if (strcmp(argv[1], "--prog1") == 0) {
-        printf("Ninja Virtual Machine started ...\n");
-        listProgram(1);
-        executeProgram(1);
-        printf("Ninja Virtual Machine stopped ...\n");
-    }
-	else if (strcmp(argv[1], "--prog2") == 0){
-		printf("Es wurde prog2 ausgewählt");
-	}
-	else if (strcmp(argv[1], "--prog3") == 0){
-		printf("Es wurde prog3 ausgewählt");
-	}
-	else if (strcmp(argv[1], "--help") == 0){
-		printf("Es wurde die Hilfe ausgewählt");
-	}
-	else {
-		printf("Kein Kommando eingegeben, Programm wird beendet ..");
-
-	}
-
-	return 1;
+void printHelp(void)
+{
+	printf("Usage: njvm [option] [option] ... \n");
+	printf("Arguments: \n");
+	printf("%s\tShows the current version of njvm.\n", ARG_VERSION);
+	printf("%s\t\tShows this help screen.\n", ARG_HELP);
+        printf("\n");
 }
 
 void listProgram(int prog){
@@ -174,30 +200,38 @@ void executeProgram(int prog){
             case ADD:
                 {
                     IR++;
-                    int sum = stack[PC - 1] + stack [PC - 2];
-                    pop();
-                    pop();
-                    push(sum);
+                    {
+                        int sum;
+                        sum = stack[PC - 1] + stack [PC - 2];
+                        pop();
+                        pop();
+                        push(sum);
+                    }
                     break;
 
                 }
             case SUB:
                 {
                     IR++;
-                    int diff = stack[PC - 2] - stack [PC - 1];
-                    pop();
-                    pop();
-                    push(diff);
+                    {
+                        int diff;
+                        diff = stack[PC - 2] - stack [PC - 1];
+                        pop();
+                        pop();
+                        push(diff);
+                    }
                     break;
-
                 }
             case MUL:
                 {
                     IR++;
-                    int prod = stack[PC - 2] * stack [PC - 1];
-                    pop();
-                    pop();
-                    push(prod);
+                    {
+                        int prod;
+                        prod = stack[PC - 2] * stack [PC - 1];
+                        pop();
+                        pop();
+                        push(prod);
+                    }
                     break;
 
                 }
