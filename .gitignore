@@ -1,5 +1,6 @@
 .idea/
 cmake-build-debug/
 jklr96/
+progs/*.bin
 CMakeLists.txt
 njvm
