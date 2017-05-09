@@ -24,7 +24,9 @@
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 
+
 void printHelp(void);
+void loadProgram(const char filename[]);
 void listProgram(int prog);
 void executeProgram(unsigned int prog []);
 void push(int number);

@@ -28,26 +28,9 @@ int main(int argc, char *argv [])
             printHelp();
             exit(EXIT_SUCCESS);
         }
-        else if (strcmp(argv[i], ARG_PROG1) == 0)
+        else
         {
-            printf("Ninja Virtual Machine started ...\n");
-            listProgram(1);
-            executeProgram(program1);
-            printf("Ninja Virtual Machine stopped ...\n");
-            exit(EXIT_SUCCESS);
-        }
-	else if (strcmp(argv[i], ARG_PROG2) == 0){
-            printf("Es wurde prog2 ausgew�hlt");
-            exit(EXIT_SUCCESS);
-	}
-	else if (strcmp(argv[i], ARG_PROG3) == 0){
-            printf("Es wurde prog3 ausgew�hlt");
-            exit(EXIT_SUCCESS);
-	}
-        else 
-        {
-            printf("unknown command line argument '%s' is not available, try %s %s\n", argv[i], argv[0], ARG_VERSION);
-            exit(EXIT_FAILURE);
+            loadProgram(argv[i]); //not sure if that works
         }
     }
   }
@@ -62,121 +45,101 @@ void printHelp(void)
 	printf("Arguments: \n");
 	printf("%s\tShows the current version of njvm.\n", ARG_VERSION);
 	printf("%s\t\tShows this help screen.\n", ARG_HELP);
-        printf("\n");
+    printf("\n");
 }
 
 void loadProgram(const char filename[]){
-    FILE *program = fopen(filename, "r");
+    FILE *program = fopen(filename, "r");   // "r" for reading
+
+    /*
+     *
+     * read in file and save in memory.. no clue how that works
+     *
+     */
+
+    fclose(program);
 }
 
-
+/* i think u fixed that allready  -- have a look
 void listProgram(int prog){
     IR = 0;
     PC = 0;
-    switch (prog){
-        case 1:
-        {
-            int program1Length = sizeof(program1)/ sizeof(program1[0]);
-            while(IR < program1Length){
-                switch(program1[IR] >> 24){
-                    case HALT:
-                        {
-                            IR++;
-                            printf("HALT\n");
-                            break;
-
-                        }
-                    case PUSHC:
-                        {
-                            printf("PUSHC %d\n", (SIGN_EXTEND(program1[IR] & 0x00FFFFFF)));
-                            IR++;
-                            break;
-
-                        }
-                    case ADD:
-                        {
-                            IR++;
-                            printf("ADD\n");
-                            break;
-
-                        }
-                    case SUB:
-                        {
-                            IR++;
-                            printf("SUB\n");
-                            break;
-
-                        }
-                    case MUL:
-                        {
-                            IR++;
-                            printf("MUL\n");
-                            break;
-
-                        }
-                    case DIV:
-                        {
-                            IR++;
-                            printf("DIV\n");
-                            break;
-
-                        }
-                    case MOD:
-                        {
-                            IR++;
-                            printf("MOD\n");
-                            break;
-
-                        }
-                    case RDINT:
-                        {
-                            IR++;
-                            printf("RDINT\n");
-                            break;
-
-                        }
-                    case WRINT:
-                        {
-                            IR++;
-                            printf("WRINT\n");
-                            break;
-
-                        }
-                    case RDCHR:
-                        {
-                            IR++;
-                            printf("RDCHAR\n");
-                            break;
-
-                        }
-                    case WRCHR:
-                        {
-                            IR++;
-                            printf("WRCHAR\n");
-                            break;
-                        }
-                    default:
-                        {
-                            printf("Not defined!");
-                        }
-
-                }
-            }
-        }
-
-        case 2:
-        {
-
-        }
-
-        case 3:
-        {
-
-        }
+    int program1Length = sizeof(program1)/ sizeof(program1[0]);
+    while(IR < program1Length){
+        switch(program1[IR] >> 24) {
+            case HALT: {
+                IR++;
+                printf("HALT\n");
+                break;
 
             }
+            case PUSHC: {
+                printf("PUSHC %d\n", (SIGN_EXTEND(program1[IR] & 0x00FFFFFF)));
+                IR++;
+                break;
+
+            }
+            case ADD: {
+                IR++;
+                printf("ADD\n");
+                break;
+
+            }
+            case SUB: {
+                IR++;
+                printf("SUB\n");
+                break;
+
+            }
+            case MUL: {
+                IR++;
+                printf("MUL\n");
+                break;
+
+            }
+            case DIV: {
+                IR++;
+                printf("DIV\n");
+                break;
+
+            }
+            case MOD: {
+                IR++;
+                printf("MOD\n");
+                break;
+
+            }
+            case RDINT: {
+                IR++;
+                printf("RDINT\n");
+                break;
+
+            }
+            case WRINT: {
+                IR++;
+                printf("WRINT\n");
+                break;
+
+            }
+            case RDCHR: {
+                IR++;
+                printf("RDCHAR\n");
+                break;
+
+            }
+            case WRCHR: {
+                IR++;
+                printf("WRCHAR\n");
+                break;
+            }
+            default: {
+                printf("Not defined!");
+            }
+        }
+    }
 }
 
+ */
 void executeProgram(unsigned int prog []){
     IR = 0;
     PC = 0;
