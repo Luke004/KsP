@@ -64,6 +64,7 @@ void loadProgram(const char filename[]){
 void listProgram(int prog){
     IR = 0;
     PC = 0;
+    /*
     int program1Length = sizeof(program1)/ sizeof(program1[0]);
     while(IR < program1Length){
         switch(program1[IR] >> 24) {
@@ -137,6 +138,7 @@ void listProgram(int prog){
             }
         }
     }
+     */
 }
 
 void executeProgram(unsigned int prog []){
