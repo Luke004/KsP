@@ -1,0 +1,2 @@
+writeInteger(readCharacter());
+writeCharacter('\n');
