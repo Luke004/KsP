@@ -60,7 +60,7 @@ void loadProgram(const char filename[]){
     fclose(program);
 }
 
-/* i think u fixed that allready  -- have a look
+
 void listProgram(int prog){
     IR = 0;
     PC = 0;
@@ -139,7 +139,6 @@ void listProgram(int prog){
     }
 }
 
- */
 void executeProgram(unsigned int prog []){
     IR = 0;
     PC = 0;
