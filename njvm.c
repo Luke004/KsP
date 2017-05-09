@@ -65,6 +65,11 @@ void printHelp(void)
         printf("\n");
 }
 
+void loadProgram(const char filename[]){
+    FILE *program = fopen(filename, "r");
+}
+
+
 void listProgram(int prog){
     IR = 0;
     PC = 0;
