@@ -6,8 +6,8 @@
 
 
 int stack [10000]; //stack
-int PC = NULL; //program counter
-int SP = NULL //stack pointer
+int PC; //program counter
+int SP; //stack pointer
 
 
 int main(int argc, char *argv [])
