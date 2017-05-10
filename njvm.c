@@ -192,55 +192,55 @@ void executeProgram(unsigned int instructions []){
         switch(instructions[PC] >> 24){
             case PUSHC:
                 {
-                    push((SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                     PC++;
+                    push((SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                     break;
-
                 }
             case ADD:
                 {
                     PC++;
-                    {
-                        int sum;
-                        sum = stack[PC - 1] + stack [PC - 2];
-                        pop();
-                        pop();
-                        push(sum);
-                    }
+                    int sum;
+                    sum = stack[PC - 1] + stack [PC - 2];
+                    pop();
+                    pop();
+                    push(sum);
                     break;
 
                 }
             case SUB:
                 {
                     PC++;
-                    {
-                        int diff;
-                        diff = stack[PC - 2] - stack [PC - 1];
-                        pop();
-                        pop();
-                        push(diff);
-                    }
+                    int diff;
+                    diff = stack[PC - 2] - stack [PC - 1];
+                    pop();
+                    pop();
+                    push(diff);
                     break;
                 }
             case MUL:
                 {
                     PC++;
-                    {
-                        int prod;
-                        prod = stack[PC - 2] * stack [PC - 1];
-                        pop();
-                        pop();
-                        push(prod);
-                    }
+                    int prod;
+                    prod = stack[PC - 2] * stack [PC - 1];
+                    pop();
+                    pop();
+                    push(prod);
                     break;
-
                 }
             case DIV:
                 {
-                    PC++;
-                    printf("DIV\n");
+                    if(stack[PC - 1] == 0){
+                        perror("You are trying to divide with '0', operation aborted!\n");
+                    }
+                    else {
+                        PC++;
+                        int quo;
+                        quo = stack[PC - 2] / stack [PC - 1];
+                        pop();
+                        pop();
+                        push(quo);
+                    }
                     break;
-
                 }
             case MOD:
                 {
