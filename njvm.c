@@ -66,7 +66,7 @@ void loadProgram(const char filename[]) {
         }
 
         //Read next 4 bytes and check them for correct Version
-        int version = NULL;
+        int version;
         int expectedVersion = 2;
         fread(&version, 4, 1, program);
         if(version != expectedVersion){
@@ -74,16 +74,16 @@ void loadProgram(const char filename[]) {
         }
 
         //Read next 4 bytes and check for the number of instructions
-        int instrSize = NULL;
+        int instrSize;
         fread(&instrSize, 4, 1, program);
         unsigned int instructions [instrSize]; //unsigned Integer containing the instructions
 
         //Read next 4 bytes and check for the number of vars in static data area
-        int numVars = NULL;
+        int numVars;
         fread(&numVars, 4, 1, program);
 
         //Read the next 4 bytes n times (based on instrSize)
-        int instr = NULL;
+        int instr;
         for(int n = 0; n < instrSize; n++){
             fread(&instr, 4, 1, program);
             instructions[n] = instr;
@@ -92,11 +92,7 @@ void loadProgram(const char filename[]) {
         PC = 0;
         SP = 0;
 
-        /*
-         *
-         * read in file and save in memory.. no clue how that works
-         *
-         */
+        listProgram(instructions, instrSize);
 
         fclose(program);
     }
@@ -105,11 +101,10 @@ void loadProgram(const char filename[]) {
 
 
 
-void listProgram(int prog){
-    /*
-    int program1Length = sizeof(program1)/ sizeof(program1[0]);
-    while(PC < program1Length){
-        switch(program1[PC] >> 24) {
+void listProgram(unsigned int instructions [], int instrSize){
+
+    while(PC < instrSize){
+        switch(instructions[PC] >> 24) {
             case HALT: {
                 PC++;
                 printf("HALT\n");
@@ -117,7 +112,7 @@ void listProgram(int prog){
 
             }
             case PUSHC: {
-                printf("PUSHC %d\n", (SIGN_EXTEND(program1[PC] & 0x00FFFFFF)));
+                printf("PUSHC %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                 PC++;
                 break;
 
@@ -180,7 +175,7 @@ void listProgram(int prog){
             }
         }
     }
-     */
+
 }
 
 void executeProgram(unsigned int prog []){
