@@ -97,6 +97,11 @@ void loadProgram(const char filename[]) {
 
         listProgram(instructions, instrSize);
 
+        PC = 0;
+        SP = 0;
+
+        executeProgram(instructions);
+
         fclose(program);
     }
 }
@@ -181,14 +186,13 @@ void listProgram(unsigned int instructions [], int instrSize){
 
 }
 
-void executeProgram(unsigned int prog []){
-    PC = 0;
-    PC = 0;
-    while(prog[PC] != HALT << 24){
-        switch(prog[PC] >> 24){
+void executeProgram(unsigned int instructions []){
+
+    while(instructions[PC] != HALT << 24){
+        switch(instructions[PC] >> 24){
             case PUSHC:
                 {
-                    push((SIGN_EXTEND(prog[PC] & 0x00FFFFFF)));
+                    push((SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                     PC++;
                     break;
 
@@ -274,7 +278,7 @@ void executeProgram(unsigned int prog []){
                 }
             default:
                 {
-                    printf("Not defined!");
+                    printf("Not defined!\n");
                 }
 
 
