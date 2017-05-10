@@ -27,7 +27,7 @@
 
 void printHelp(void);
 void loadProgram(const char filename[]);
-void listProgram(int prog);
+void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int prog []);
 void push(int number);
 void pop();
