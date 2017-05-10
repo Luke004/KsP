@@ -54,11 +54,18 @@ void loadProgram(const char filename[]) {
     if (program == NULL) {
         perror("File not found! ");
     } else {
+        char *format;
+        char *expectedString = "NJBF";
+        int version;
+        int expectedVersion = 2;
+        int instrSize;
+        unsigned int instructions [instrSize]; /*unsigned Integer containing the instructions */
+        int numVars;
+        int instr;
+
         printf("%s was found and opened ..\n", filename);
 
         /*Read first 4 bytes and check them for correct format */
-        char *format;
-        char *expectedString = "NJBF";
         format = (char*) malloc (4);
         fread(format, 1, 4, program);
         if(strcmp(format, expectedString) != 0){
@@ -66,24 +73,19 @@ void loadProgram(const char filename[]) {
         }
 
         /*Read next 4 bytes and check them for correct Version */
-        int version;
-        int expectedVersion = 2;
         fread(&version, 4, 1, program);
         if(version != expectedVersion){
             perror("Incorrect Version!\n");
         }
 
         /*Read next 4 bytes and check for the number of instructions */
-        int instrSize;
         fread(&instrSize, 4, 1, program);
-        unsigned int instructions [instrSize]; /*unsigned Integer containing the instructions */
+
 
         /*Read next 4 bytes and check for the number of vars in static data area*/
-        int numVars;
         fread(&numVars, 4, 1, program);
 
         /*Read the next 4 bytes n times (based on instrSize) */
-        int instr;
         for(int n = 0; n < instrSize; n++){
             fread(&instr, 4, 1, program);
             instructions[n] = instr;
