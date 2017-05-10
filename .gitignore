@@ -4,3 +4,5 @@ jklr96/
 progs/*.bin
 CMakeLists.txt
 njvm
+compile
+nja
