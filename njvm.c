@@ -5,7 +5,7 @@
 
 
 
-int stack [10000]; /*stack */
+int stack [STACK_SIZE]; /*stack */
 int PC; /*program counter */
 int SP; /*stack pointer */
 
@@ -287,7 +287,16 @@ void executeProgram(unsigned int instructions []){
 }
 
 void push(int number){
-	stack[SP++] = number;
+    if(SP > STACK_SIZE - 1){
+        perror("Stack is full, push cannot be performed!\n");
+    }
+        else if(SP < 0){
+        perror("Stack pointer is below zero, push cannot be performed!\n");
+    }
+
+    else {
+        stack[SP++] = number;
+    }
 }
 
 void pop (){
