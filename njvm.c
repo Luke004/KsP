@@ -5,9 +5,9 @@
 
 
 
-int stack [10000]; //stack
-int PC; //program counter
-int SP; //stack pointer
+int stack [10000]; /*stack */
+int PC; /*program counter */
+int SP; /*stack pointer */
 
 
 int main(int argc, char *argv [])
@@ -31,7 +31,7 @@ int main(int argc, char *argv [])
         }
         else
         {
-            loadProgram(argv[i]); //not sure if that works
+            loadProgram(argv[i]);
         }
     }
   }
@@ -50,13 +50,13 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[]) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   // "r" for reading
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
         printf("%s was found and opened ..\n", filename);
 
-        //Read first 4 bytes and check them for correct format
+        /*Read first 4 bytes and check them for correct format */
         char *format;
         char *expectedString = "NJBF";
         format = (char*) malloc (4);
@@ -65,7 +65,7 @@ void loadProgram(const char filename[]) {
             perror("Incorrect Format!\n");
         }
 
-        //Read next 4 bytes and check them for correct Version
+        /*Read next 4 bytes and check them for correct Version */
         int version;
         int expectedVersion = 2;
         fread(&version, 4, 1, program);
@@ -73,16 +73,16 @@ void loadProgram(const char filename[]) {
             perror("Incorrect Version!\n");
         }
 
-        //Read next 4 bytes and check for the number of instructions
+        /*Read next 4 bytes and check for the number of instructions */
         int instrSize;
         fread(&instrSize, 4, 1, program);
-        unsigned int instructions [instrSize]; //unsigned Integer containing the instructions
+        unsigned int instructions [instrSize]; /*unsigned Integer containing the instructions */
 
-        //Read next 4 bytes and check for the number of vars in static data area
+        /*Read next 4 bytes and check for the number of vars in static data area*/
         int numVars;
         fread(&numVars, 4, 1, program);
 
-        //Read the next 4 bytes n times (based on instrSize)
+        /*Read the next 4 bytes n times (based on instrSize) */
         int instr;
         for(int n = 0; n < instrSize; n++){
             fread(&instr, 4, 1, program);
