@@ -5,9 +5,9 @@
 
 
 
-int stack [1000];
-int PC = 0;
-int IR = 0;
+int stack [10000]; //stack
+int PC = NULL; //program counter
+int SP = NULL //stack pointer
 
 
 int main(int argc, char *argv [])
@@ -49,32 +49,48 @@ void printHelp(void)
     printf("\n");
 }
 
-void loadProgram(const char filename[]){
-    FILE *program = fopen("./home/lukas/Desktop/KsP/KsP/prog1", "r");   // "r" for reading
-    if(program == NULL){
-        perror("File not found ");
-    }
+void loadProgram(const char filename[]) {
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   // "r" for reading
+    if (program == NULL) {
+        perror("File not found! ");
+    } else {
+        printf("%s was found and opened ..\n", filename);
 
-    else {
-        char * instructionStorage;
-        long fileLength;
-        size_t reader;
-        printf("%s was found and opened ..\n", filename  );
-        fseek (program , 0 , SEEK_SET);
-        fileLength = ftell (program);
-        rewind (program);
-        instructionStorage = (char*) malloc (sizeof(char)*fileLength);
-        if (instructionStorage == NULL)
-            printf("Memory storage failed ...\n");
-        else {
-            reader =  fread(instructionStorage, 1, fileLength, program);
-            if (reader != fileLength)
-                printf("Reading failed ...\n");
-            }
-
+        //Read first 4 bytes and check them for correct format
+        char *format;
+        char *expectedString = "NJBF";
+        format = (char*) malloc (4);
+        fread(format, 1, 4, program);
+        if(strcmp(format, expectedString) != 0){
+            perror("Incorrect Format!\n");
         }
 
+        //Read next 4 bytes and check them for correct Version
+        int version = NULL;
+        int expectedVersion = 2;
+        fread(&version, 4, 1, program);
+        if(version != expectedVersion){
+            perror("Incorrect Version!\n");
+        }
 
+        //Read next 4 bytes and check for the number of instructions
+        int instrSize = NULL;
+        fread(&instrSize, 4, 1, program);
+        unsigned int instructions [instrSize]; //unsigned Integer containing the instructions
+
+        //Read next 4 bytes and check for the number of vars in static data area
+        int numVars = NULL;
+        fread(&numVars, 4, 1, program);
+
+        //Read the next 4 bytes n times (based on instrSize)
+        int instr = NULL;
+        for(int n = 0; n < instrSize; n++){
+            fread(&instr, 4, 1, program);
+            instructions[n] = instr;
+        }
+
+        PC = 0;
+        SP = 0;
 
         /*
          *
@@ -84,79 +100,78 @@ void loadProgram(const char filename[]){
 
         fclose(program);
     }
+}
 
 
 
 
 void listProgram(int prog){
-    IR = 0;
-    PC = 0;
     /*
     int program1Length = sizeof(program1)/ sizeof(program1[0]);
-    while(IR < program1Length){
-        switch(program1[IR] >> 24) {
+    while(PC < program1Length){
+        switch(program1[PC] >> 24) {
             case HALT: {
-                IR++;
+                PC++;
                 printf("HALT\n");
                 break;
 
             }
             case PUSHC: {
-                printf("PUSHC %d\n", (SIGN_EXTEND(program1[IR] & 0x00FFFFFF)));
-                IR++;
+                printf("PUSHC %d\n", (SIGN_EXTEND(program1[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
 
             }
             case ADD: {
-                IR++;
+                PC++;
                 printf("ADD\n");
                 break;
 
             }
             case SUB: {
-                IR++;
+                PC++;
                 printf("SUB\n");
                 break;
 
             }
             case MUL: {
-                IR++;
+                PC++;
                 printf("MUL\n");
                 break;
 
             }
             case DIV: {
-                IR++;
+                PC++;
                 printf("DIV\n");
                 break;
 
             }
             case MOD: {
-                IR++;
+                PC++;
                 printf("MOD\n");
                 break;
 
             }
             case RDINT: {
-                IR++;
+                PC++;
                 printf("RDINT\n");
                 break;
 
             }
             case WRINT: {
-                IR++;
+                PC++;
                 printf("WRINT\n");
                 break;
 
             }
             case RDCHR: {
-                IR++;
+                PC++;
                 printf("RDCHAR\n");
                 break;
 
             }
             case WRCHR: {
-                IR++;
+                PC++;
                 printf("WRCHAR\n");
                 break;
             }
@@ -169,20 +184,20 @@ void listProgram(int prog){
 }
 
 void executeProgram(unsigned int prog []){
-    IR = 0;
     PC = 0;
-    while(prog[IR] != HALT << 24){
-        switch(prog[IR] >> 24){
+    PC = 0;
+    while(prog[PC] != HALT << 24){
+        switch(prog[PC] >> 24){
             case PUSHC:
                 {
-                    push((SIGN_EXTEND(prog[IR] & 0x00FFFFFF)));
-                    IR++;
+                    push((SIGN_EXTEND(prog[PC] & 0x00FFFFFF)));
+                    PC++;
                     break;
 
                 }
             case ADD:
                 {
-                    IR++;
+                    PC++;
                     {
                         int sum;
                         sum = stack[PC - 1] + stack [PC - 2];
@@ -195,7 +210,7 @@ void executeProgram(unsigned int prog []){
                 }
             case SUB:
                 {
-                    IR++;
+                    PC++;
                     {
                         int diff;
                         diff = stack[PC - 2] - stack [PC - 1];
@@ -207,7 +222,7 @@ void executeProgram(unsigned int prog []){
                 }
             case MUL:
                 {
-                    IR++;
+                    PC++;
                     {
                         int prod;
                         prod = stack[PC - 2] * stack [PC - 1];
@@ -220,42 +235,42 @@ void executeProgram(unsigned int prog []){
                 }
             case DIV:
                 {
-                    IR++;
+                    PC++;
                     printf("DIV\n");
                     break;
 
                 }
             case MOD:
                 {
-                    IR++;
+                    PC++;
                     printf("MOD\n");
                     break;
 
                 }
             case RDINT:
                 {
-                    IR++;
+                    PC++;
                     printf("RDINT\n");
                     break;
 
                 }
             case WRINT:
                 {
-                    IR++;
+                    PC++;
                     printf("%d\n",stack[PC - 1]);
                     break;
 
                 }
             case RDCHR:
                 {
-                    IR++;
+                    PC++;
                     printf("RDCHAR\n");
                     break;
 
                 }
             case WRCHR:
                 {
-                    IR++;
+                    PC++;
                     printf("%c",stack [PC - 1]);
                     break;
                 }
@@ -270,9 +285,9 @@ void executeProgram(unsigned int prog []){
 }
 
 void push(int number){
-	stack[PC++] = number;
+	stack[SP++] = number;
 }
 
 void pop (){
-	PC --;
+	SP --;
 }
