@@ -9,6 +9,7 @@ int stack [1000];
 int PC = 0;
 int IR = 0;
 
+
 int main(int argc, char *argv [])
 {
     
@@ -49,16 +50,42 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[]){
-    FILE *program = fopen(filename, "r");   // "r" for reading
+    FILE *program = fopen("./home/lukas/Desktop/KsP/KsP/prog1", "r");   // "r" for reading
+    if(program == NULL){
+        perror("File not found ");
+    }
 
-    /*
-     *
-     * read in file and save in memory.. no clue how that works
-     *
-     */
+    else {
+        char * instructionStorage;
+        long fileLength;
+        size_t reader;
+        printf("%s was found and opened ..\n", filename  );
+        fseek (program , 0 , SEEK_SET);
+        fileLength = ftell (program);
+        rewind (program);
+        instructionStorage = (char*) malloc (sizeof(char)*fileLength);
+        if (instructionStorage == NULL)
+            printf("Memory storage failed ...\n");
+        else {
+            reader =  fread(instructionStorage, 1, fileLength, program);
+            if (reader != fileLength)
+                printf("Reading failed ...\n");
+            }
 
-    fclose(program);
-}
+        }
+
+
+
+        /*
+         *
+         * read in file and save in memory.. no clue how that works
+         *
+         */
+
+        fclose(program);
+    }
+
+
 
 
 void listProgram(int prog){
