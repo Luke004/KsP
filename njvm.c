@@ -86,10 +86,12 @@ void loadProgram(const char filename[]) {
         fread(&numVars, 4, 1, program);
 
         /*Read the next 4 bytes n times (based on instrSize) */
-        for(int n = 0; n < instrSize; n++){
+        do {
             fread(&instr, 4, 1, program);
-            instructions[n] = instr;
+            instructions[PC] = instr;
+            PC ++;
         }
+        while (PC < instrSize);
 
         PC = 0;
         SP = 0;
