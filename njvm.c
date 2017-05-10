@@ -59,7 +59,7 @@ void loadProgram(const char filename[]) {
         int version;
         int expectedVersion = 2;
         int instrSize;
-        unsigned int instructions [instrSize]; /*unsigned Integer containing the instructions */
+        unsigned int *instructions; /*unsigned Integer containing the instructions */
         int numVars;
         int instr;
 
@@ -80,7 +80,7 @@ void loadProgram(const char filename[]) {
 
         /*Read next 4 bytes and check for the number of instructions */
         fread(&instrSize, 4, 1, program);
-
+        instructions = (unsigned int*) malloc(instrSize);
 
         /*Read next 4 bytes and check for the number of vars in static data area*/
         fread(&numVars, 4, 1, program);
