@@ -57,7 +57,6 @@ void loadProgram(const char filename[]) {
         char *format;
         char *expectedString = "NJBF";
         int version;
-        int expectedVersion = 2;
         int instrSize;
         unsigned int *instructions; /*unsigned Integer containing the instructions */
         int numVars;
@@ -74,7 +73,7 @@ void loadProgram(const char filename[]) {
 
         /*Read next 4 bytes and check them for correct Version */
         fread(&version, 4, 1, program);
-        if(version != expectedVersion){
+        if(version != NJVM_VERSION){
             perror("Incorrect Version!\n");
         }
 

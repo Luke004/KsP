@@ -7,7 +7,7 @@
 #define ARG_PROG3 "--prog3"
 
 /* VM Version Info */
-#define NJVM_VERSION 1
+#define NJVM_VERSION 2
 
 #define HALT 0
 #define PUSHC 1
