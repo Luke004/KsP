@@ -310,7 +310,7 @@ void executeProgram(unsigned int instructions []){
                 }
             case RDCHR:
                 {
-                    int character;
+                    char character;
                     scanf("%c",&character);
                     push(character);
                     PC++;
