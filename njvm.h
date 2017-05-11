@@ -23,11 +23,12 @@
 
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
+#define STACK_SIZE 10000
 
 
 void printHelp(void);
 void loadProgram(const char filename[]);
 void listProgram(unsigned int prog [], int instrSize);
-void executeProgram(unsigned int prog []);
+void executeProgram(unsigned int instructions []);
 void push(int number);
 void pop();
