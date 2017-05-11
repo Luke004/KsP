@@ -51,7 +51,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[]) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   /*"r" for reading */
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/stackFrame", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -61,7 +61,7 @@ void loadProgram(const char filename[]) {
         int instrSize;
         unsigned int *instructions; /*unsigned Integer containing the instructions */
         int numVars;
-        int instr;
+        unsigned int instr;
 
         printf("%s was found and opened ..\n", filename);
 
@@ -116,10 +116,9 @@ void listProgram(unsigned int instructions [], int instrSize){
         switch(instructions[PC] >> 24) {
             case HALT:
             {
-                PC++;
                 printf("HALT\n");
+                PC++;
                 break;
-
             }
             case PUSHC:
             {
@@ -130,100 +129,92 @@ void listProgram(unsigned int instructions [], int instrSize){
             }
             case ADD:
             {
-                PC++;
                 printf("ADD\n");
+                PC++;
                 break;
-
             }
             case SUB:
             {
-                PC++;
                 printf("SUB\n");
+                PC++;
                 break;
-
             }
             case MUL:
             {
-                PC++;
                 printf("MUL\n");
+                PC++;
                 break;
-
             }
             case DIV:
             {
-                PC++;
                 printf("DIV\n");
+                PC++;
                 break;
-
             }
             case MOD:
             {
-                PC++;
                 printf("MOD\n");
+                PC++;
                 break;
-
             }
             case RDINT:
             {
-                PC++;
                 printf("RDINT\n");
+                PC++;
                 break;
-
             }
             case WRINT:
             {
-                PC++;
                 printf("WRINT\n");
+                PC++;
                 break;
-
             }
             case RDCHR:
             {
-                PC++;
                 printf("RDCHAR\n");
+                PC++;
                 break;
-
             }
             case WRCHR:
             {
-                PC++;
                 printf("WRCHAR\n");
+                PC++;
                 break;
             }
             case PUSHG:
             {
-                PC++;
                 printf("PUSHG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
             }
             case POPG:
             {
-                PC++;
                 printf("POPG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
             }
             case ASF:
             {
-                PC++;
                 printf("ASF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
             }
             case RSF:
             {
-                PC++;
                 printf("RSF\n");
+                PC++;
                 break;
             }
             case PUSHL:
             {
-                PC++;
                 printf("PUSHL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
             }
             case POPL:
             {
-                PC++;
                 printf("POPL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                PC++;
                 break;
             }
             default: {
@@ -249,9 +240,9 @@ void executeProgram(unsigned int instructions []){
                     int add_num1 = pop();
                     int add_num2 = pop();
                     int sum;
-                    PC++;
                     sum = add_num2 + add_num1;
                     push(sum);
+                    PC++;
                     break;
 
                 }
@@ -260,9 +251,9 @@ void executeProgram(unsigned int instructions []){
                     int diff_num1 = pop();
                     int diff_num2 = pop();
                     int diff;
-                    PC++;
                     diff = diff_num2 - diff_num1;
                     push(diff);
+                    PC++;
                     break;
                 }
             case MUL:
@@ -270,9 +261,9 @@ void executeProgram(unsigned int instructions []){
                     int prod_num1 = pop();
                     int prod_num2 = pop();
                     int prod;
-                    PC++;
                     prod = prod_num2 * prod_num1;
                     push(prod);
+                    PC++;
                     break;
                 }
             case DIV:
@@ -284,10 +275,10 @@ void executeProgram(unsigned int instructions []){
                     }
                     else {
                         int quo;
-                        PC++;
                         quo = quo_num2 / quo_num1;
                         push(quo);
                     }
+                    PC++;
                     break;
                 }
             case MOD:
@@ -295,80 +286,90 @@ void executeProgram(unsigned int instructions []){
                     int mod_num1 = pop();
                     int mod_num2 = pop();
                     int mod;
-                    PC++;
                     mod = mod_num2 % mod_num1;
                     push(mod);
+                    PC++;
                     break;
                 }
             case RDINT:
                 {
                     int num;
-                    PC++;
                     scanf("%d",&num);
                     push(num);
+                    PC++;
                     break;
 
                 }
             case WRINT:
                 {
-                    PC++;
                     int num = pop();
                     printf("%d\n",num);
+                    PC++;
                     break;
 
                 }
             case RDCHR:
                 {
                     int character;
-                    PC++;
                     scanf("%c",&character);
                     push(character);
+                    PC++;
                     break;
 
                 }
             case WRCHR:
                 {
-                    PC++;
                     int c = pop();
                     printf("%c",c);
+                    PC++;
                     break;
                 }
             case PUSHG:
                 {
-                    PC++;
 
+                    PC++;
                     break;
                 }
             case POPG:
                 {
-                    PC++;
 
+                    PC++;
                     break;
                 }
             case ASF:
                 {
                     int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
-                    PC++;
+                    push(FP);
                     FP = SP;
                     SP = SP + n; /*allocate new stack frame on stack by size 'n' */
+                    PC++;
                     break;
                 }
             case RSF:
                 {
-                    PC++;
                     SP = FP;
+                    FP = pop();
+                    PC++;
                     break;
                 }
             case PUSHL:
                 {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    if(n >= SP - FP){
+                        perror("Out of bounds. You're not pointing to an index within the stack frame!\n");
+                    }
+                    else {
+                        push(stack[FP + n]);
+                    }
                     PC++;
-
                     break;
                 }
             case POPL:
                 {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    int val = pop();
+                    stack[FP + n] = val;
                     PC++;
-
                     break;
                 }
             default:
