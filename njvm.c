@@ -198,8 +198,8 @@ void executeProgram(unsigned int instructions []){
                 }
             case ADD:
                 {
-                    PC++;
                     int sum;
+                    PC++;
                     sum = stack[PC - 1] + stack [PC - 2];
                     pop();
                     pop();
@@ -209,8 +209,8 @@ void executeProgram(unsigned int instructions []){
                 }
             case SUB:
                 {
-                    PC++;
                     int diff;
+                    PC++;
                     diff = stack[PC - 2] - stack [PC - 1];
                     pop();
                     pop();
@@ -219,8 +219,8 @@ void executeProgram(unsigned int instructions []){
                 }
             case MUL:
                 {
-                    PC++;
                     int prod;
+                    PC++;
                     prod = stack[PC - 2] * stack [PC - 1];
                     pop();
                     pop();
@@ -233,8 +233,8 @@ void executeProgram(unsigned int instructions []){
                         perror("You are trying to divide with '0', operation aborted!\n");
                     }
                     else {
-                        PC++;
                         int quo;
+                        PC++;
                         quo = stack[PC - 2] / stack [PC - 1];
                         pop();
                         pop();
