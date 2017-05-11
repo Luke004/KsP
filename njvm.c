@@ -254,8 +254,10 @@ void executeProgram(unsigned int instructions []){
                 }
             case RDINT:
                 {
+                    int num;
                     PC++;
-                    printf("RDINT\n");
+                    scanf("%d",&num);
+                    push(num);
                     break;
 
                 }
@@ -268,8 +270,10 @@ void executeProgram(unsigned int instructions []){
                 }
             case RDCHR:
                 {
+                    int character;
                     PC++;
-                    printf("RDCHAR\n");
+                    scanf("%c",&character);
+                    push(character);
                     break;
 
                 }
