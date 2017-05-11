@@ -244,10 +244,13 @@ void executeProgram(unsigned int instructions []){
                 }
             case MOD:
                 {
+                    int mod;
                     PC++;
-                    printf("MOD\n");
+                    mod = stack[PC - 2] % stack [PC - 1];
+                    pop();
+                    pop();
+                    push(mod);
                     break;
-
                 }
             case RDINT:
                 {
