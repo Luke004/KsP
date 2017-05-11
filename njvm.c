@@ -240,8 +240,8 @@ void executeProgram(unsigned int instructions []){
         switch(instructions[PC] >> 24){
             case PUSHC:
                 {
-                    PC++;
                     push((SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
                     break;
                 }
             case ADD:
@@ -250,7 +250,7 @@ void executeProgram(unsigned int instructions []){
                     int add_num2 = pop();
                     int sum;
                     PC++;
-                    sum = add_num1 * add_num2;
+                    sum = add_num2 + add_num1;
                     push(sum);
                     break;
 
@@ -261,7 +261,7 @@ void executeProgram(unsigned int instructions []){
                     int diff_num2 = pop();
                     int diff;
                     PC++;
-                    diff = diff_num1 - diff_num2;
+                    diff = diff_num2 - diff_num1;
                     push(diff);
                     break;
                 }
@@ -271,7 +271,7 @@ void executeProgram(unsigned int instructions []){
                     int prod_num2 = pop();
                     int prod;
                     PC++;
-                    prod = prod_num1 * prod_num2;
+                    prod = prod_num2 * prod_num1;
                     push(prod);
                     break;
                 }
@@ -279,13 +279,13 @@ void executeProgram(unsigned int instructions []){
                 {
                     int quo_num1 = pop ();
                     int quo_num2 = pop ();
-                    if(quo_num2 == 0){
+                    if(quo_num1 == 0){
                         perror("You are trying to divide with '0', operation aborted!\n");
                     }
                     else {
                         int quo;
                         PC++;
-                        quo = quo_num1 / quo_num2;
+                        quo = quo_num2 / quo_num1;
                         push(quo);
                     }
                     break;
@@ -296,7 +296,7 @@ void executeProgram(unsigned int instructions []){
                     int mod_num2 = pop();
                     int mod;
                     PC++;
-                    mod = mod_num1 % mod_num2;
+                    mod = mod_num2 % mod_num1;
                     push(mod);
                     break;
                 }
@@ -312,7 +312,8 @@ void executeProgram(unsigned int instructions []){
             case WRINT:
                 {
                     PC++;
-                    printf("%d\n",stack[PC - 1]);
+                    int num = pop();
+                    printf("%d\n",num);
                     break;
 
                 }
@@ -328,7 +329,8 @@ void executeProgram(unsigned int instructions []){
             case WRCHR:
                 {
                     PC++;
-                    printf("%c",stack [PC - 1]);
+                    int c = pop();
+                    printf("%c",c);
                     break;
                 }
             case PUSHG:
@@ -393,5 +395,5 @@ void push(int number){
 }
 
 int pop (){
-    return stack[SP--];
+    return stack[--SP];
 }
