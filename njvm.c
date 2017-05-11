@@ -339,9 +339,15 @@ void executeProgram(unsigned int instructions []){
             case ASF:
                 {
                     int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
-                    push(FP);
-                    FP = SP;
-                    SP = SP + n; /*allocate new stack frame on stack by size 'n' */
+                    if(n > STACK_SIZE - 2){
+                        perror("Stack is too small to hold this stack frame!\n");
+                    } else if (n <= 0){
+                        perror("Cannot create a stack frame smaller than 1!\n");
+                    } else {
+                        push(FP);
+                        FP = SP;
+                        SP = SP + n; /*allocate new stack frame on stack by size 'n' */
+                    }
                     PC++;
                     break;
                 }
@@ -355,7 +361,7 @@ void executeProgram(unsigned int instructions []){
             case PUSHL:
                 {
                     int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
-                    if(n >= SP - FP){
+                    if(n >= SP - FP || n < 0){
                         perror("Out of bounds. You're not pointing to an index within the stack frame!\n");
                     }
                     else {
