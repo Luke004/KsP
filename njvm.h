@@ -37,4 +37,4 @@ void loadProgram(const char filename[]);
 void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int instructions []);
 void push(int number);
-void pop();
+int pop();

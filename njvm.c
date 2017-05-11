@@ -8,6 +8,7 @@
 int stack [STACK_SIZE]; /*stack */
 int PC; /*program counter */
 int SP; /*stack pointer */
+int FP; /*frame pointer */
 
 
 int main(int argc, char *argv [])
@@ -113,69 +114,116 @@ void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
         switch(instructions[PC] >> 24) {
-            case HALT: {
+            case HALT:
+            {
                 PC++;
                 printf("HALT\n");
                 break;
 
             }
-            case PUSHC: {
+            case PUSHC:
+            {
                 printf("PUSHC %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                 PC++;
                 break;
 
             }
-            case ADD: {
+            case ADD:
+            {
                 PC++;
                 printf("ADD\n");
                 break;
 
             }
-            case SUB: {
+            case SUB:
+            {
                 PC++;
                 printf("SUB\n");
                 break;
 
             }
-            case MUL: {
+            case MUL:
+            {
                 PC++;
                 printf("MUL\n");
                 break;
 
             }
-            case DIV: {
+            case DIV:
+            {
                 PC++;
                 printf("DIV\n");
                 break;
 
             }
-            case MOD: {
+            case MOD:
+            {
                 PC++;
                 printf("MOD\n");
                 break;
 
             }
-            case RDINT: {
+            case RDINT:
+            {
                 PC++;
                 printf("RDINT\n");
                 break;
 
             }
-            case WRINT: {
+            case WRINT:
+            {
                 PC++;
                 printf("WRINT\n");
                 break;
 
             }
-            case RDCHR: {
+            case RDCHR:
+            {
                 PC++;
                 printf("RDCHAR\n");
                 break;
 
             }
-            case WRCHR: {
+            case WRCHR:
+            {
                 PC++;
                 printf("WRCHAR\n");
+                break;
+            }
+            case PUSHG:
+            {
+                PC++;
+                printf("PUSHG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                break;
+            }
+            case POPG:
+            {
+                PC++;
+                printf("POPG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                break;
+            }
+            case ASF:
+            {
+                PC++;
+                printf("ASF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                break;
+            }
+            case RSF:
+            {
+                PC++;
+                printf("RSF\n");
+                break;
+            }
+            case PUSHL:
+            {
+                PC++;
+                printf("PUSHL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                break;
+            }
+            case POPL:
+            {
+                PC++;
+                printf("POPL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
                 break;
             }
             default: {
@@ -198,57 +246,57 @@ void executeProgram(unsigned int instructions []){
                 }
             case ADD:
                 {
+                    int add_num1 = pop();
+                    int add_num2 = pop();
                     int sum;
                     PC++;
-                    sum = stack[PC - 1] + stack [PC - 2];
-                    pop();
-                    pop();
+                    sum = add_num1 * add_num2;
                     push(sum);
                     break;
 
                 }
             case SUB:
                 {
+                    int diff_num1 = pop();
+                    int diff_num2 = pop();
                     int diff;
                     PC++;
-                    diff = stack[PC - 2] - stack [PC - 1];
-                    pop();
-                    pop();
+                    diff = diff_num1 - diff_num2;
                     push(diff);
                     break;
                 }
             case MUL:
                 {
+                    int prod_num1 = pop();
+                    int prod_num2 = pop();
                     int prod;
                     PC++;
-                    prod = stack[PC - 2] * stack [PC - 1];
-                    pop();
-                    pop();
+                    prod = prod_num1 * prod_num2;
                     push(prod);
                     break;
                 }
             case DIV:
                 {
-                    if(stack[PC - 1] == 0){
+                    int quo_num1 = pop ();
+                    int quo_num2 = pop ();
+                    if(quo_num2 == 0){
                         perror("You are trying to divide with '0', operation aborted!\n");
                     }
                     else {
                         int quo;
                         PC++;
-                        quo = stack[PC - 2] / stack [PC - 1];
-                        pop();
-                        pop();
+                        quo = quo_num1 / quo_num2;
                         push(quo);
                     }
                     break;
                 }
             case MOD:
                 {
+                    int mod_num1 = pop();
+                    int mod_num2 = pop();
                     int mod;
                     PC++;
-                    mod = stack[PC - 2] % stack [PC - 1];
-                    pop();
-                    pop();
+                    mod = mod_num1 % mod_num2;
                     push(mod);
                     break;
                 }
@@ -283,6 +331,44 @@ void executeProgram(unsigned int instructions []){
                     printf("%c",stack [PC - 1]);
                     break;
                 }
+            case PUSHG:
+                {
+                    PC++;
+
+                    break;
+                }
+            case POPG:
+                {
+                    PC++;
+
+                    break;
+                }
+            case ASF:
+                {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    PC++;
+                    FP = SP;
+                    SP = SP + n; /*allocate new stack frame on stack by size 'n' */
+                    break;
+                }
+            case RSF:
+                {
+                    PC++;
+                    SP = FP;
+                    break;
+                }
+            case PUSHL:
+                {
+                    PC++;
+
+                    break;
+                }
+            case POPL:
+                {
+                    PC++;
+
+                    break;
+                }
             default:
                 {
                     printf("Not defined!\n");
@@ -306,6 +392,6 @@ void push(int number){
     }
 }
 
-void pop (){
-	SP --;
+int pop (){
+    return stack[SP--];
 }
