@@ -35,6 +35,6 @@
 void printHelp(void);
 void loadProgram(const char filename[]);
 void listProgram(unsigned int prog [], int instrSize);
-void executeProgram(unsigned int instructions []);
+void executeProgram(unsigned int instructions [], int staticDataArea_size);
 void push(int number);
 int pop();

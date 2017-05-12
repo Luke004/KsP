@@ -9,6 +9,7 @@ int stack [STACK_SIZE]; /*stack */
 int PC; /*program counter */
 int SP; /*stack pointer */
 int FP; /*frame pointer */
+int *staticDataArea; /*static data area (for global vars) */
 
 
 int main(int argc, char *argv [])
@@ -51,7 +52,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[]) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/stackFrame", "r");   /*"r" for reading */
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/staticData", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -80,10 +81,11 @@ void loadProgram(const char filename[]) {
 
         /*Read next 4 bytes and check for the number of instructions */
         fread(&instrSize, 4, 1, program);
-        instructions = (unsigned int*) malloc(instrSize);
+        instructions = (unsigned int*) malloc(instrSize * sizeof(int));
 
         /*Read next 4 bytes and check for the number of vars in static data area*/
         fread(&numVars, 4, 1, program);
+        staticDataArea = (int*)malloc(numVars * sizeof(int));
 
         /*Read the next 4 bytes n times (based on instrSize) */
         do {
@@ -101,7 +103,7 @@ void loadProgram(const char filename[]) {
         PC = 0;
         SP = 0;
 
-        executeProgram(instructions);
+        executeProgram(instructions, numVars);
 
         fclose(program);
     }
@@ -113,6 +115,7 @@ void loadProgram(const char filename[]) {
 void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
+        int ins = instructions[PC];
         switch(instructions[PC] >> 24) {
             case HALT:
             {
@@ -225,9 +228,10 @@ void listProgram(unsigned int instructions [], int instrSize){
 
 }
 
-void executeProgram(unsigned int instructions []){
+void executeProgram(unsigned int instructions [], int staticDataArea_size){
 
     while(instructions[PC] != HALT << 24){
+        int ins = instructions[PC];
         switch(instructions[PC] >> 24){
             case PUSHC:
                 {
@@ -326,13 +330,26 @@ void executeProgram(unsigned int instructions []){
                 }
             case PUSHG:
                 {
-
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    if(n >= staticDataArea_size || n < 0){
+                        perror("Out of bounds. You're not pointing to an index within the static data area!\n");
+                    }
+                    else {
+                        push(staticDataArea[n]);
+                    }
                     PC++;
                     break;
                 }
             case POPG:
                 {
-
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    if(n >=  staticDataArea_size || n < 0){
+                        perror("Out of bounds. You're not pointing to an index within the static data area!\n");
+                    }
+                    else {
+                        int val = pop();
+                        staticDataArea[n] = val;
+                    }
                     PC++;
                     break;
                 }
@@ -381,6 +398,7 @@ void executeProgram(unsigned int instructions []){
             default:
                 {
                     printf("Not defined!\n");
+                    PC++;
                 }
 
 
