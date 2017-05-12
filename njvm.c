@@ -52,7 +52,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[]) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/staticData", "r");   /*"r" for reading */
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/newprog2", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -115,114 +115,169 @@ void loadProgram(const char filename[]) {
 void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
-        int ins = instructions[PC];
         switch(instructions[PC] >> 24) {
             case HALT:
-            {
-                printf("HALT\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("HALT\n");
+                    PC++;
+                    break;
+                }
             case PUSHC:
-            {
-                printf("PUSHC %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
+                {
+                    printf("PUSHC %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
 
-            }
+                }
             case ADD:
-            {
-                printf("ADD\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("ADD\n");
+                    PC++;
+                    break;
+                }
             case SUB:
-            {
-                printf("SUB\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("SUB\n");
+                    PC++;
+                    break;
+                }
             case MUL:
-            {
-                printf("MUL\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("MUL\n");
+                    PC++;
+                    break;
+                }
             case DIV:
-            {
-                printf("DIV\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("DIV\n");
+                    PC++;
+                    break;
+                }
             case MOD:
-            {
-                printf("MOD\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("MOD\n");
+                    PC++;
+                    break;
+                }
             case RDINT:
-            {
-                printf("RDINT\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("RDINT\n");
+                    PC++;
+                    break;
+                }
             case WRINT:
-            {
-                printf("WRINT\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("WRINT\n");
+                    PC++;
+                    break;
+                }
             case RDCHR:
-            {
-                printf("RDCHAR\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("RDCHAR\n");
+                    PC++;
+                    break;
+                }
             case WRCHR:
-            {
-                printf("WRCHAR\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("WRCHAR\n");
+                    PC++;
+                    break;
+                }
             case PUSHG:
-            {
-                printf("PUSHG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
-            }
+                {
+                    printf("PUSHG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
             case POPG:
-            {
-                printf("POPG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
-            }
+                {
+                    printf("POPG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
             case ASF:
-            {
-                printf("ASF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
-            }
+                {
+                    printf("ASF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
             case RSF:
-            {
-                printf("RSF\n");
-                PC++;
-                break;
-            }
+                {
+                    printf("RSF\n");
+                    PC++;
+                    break;
+                }
             case PUSHL:
-            {
-                printf("PUSHL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
-            }
+                {
+                    printf("PUSHL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
             case POPL:
-            {
-                printf("POPL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                PC++;
-                break;
-            }
-            default: {
-                printf("Not defined!");
-            }
+                {
+                    printf("POPL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
+            case EQ:
+                {
+                    printf("EQ\n");
+                    PC++;
+                    break;
+                }
+            case NE:
+                {
+                    printf("NE\n");
+                    PC++;
+                    break;
+                }
+            case LT:
+                {
+                    printf("LT\n");
+                    PC++;
+                    break;
+                }
+            case LE:
+                {
+                    printf("LE\n");
+                    PC++;
+                    break;
+                }
+            case GT:
+                {
+                    printf("GT\n");
+                    PC++;
+                    break;
+                }
+            case GE:
+                {
+                    printf("GE\n");
+                    PC++;
+                    break;
+                }
+            case JMP:
+                {
+                    printf("JMP %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
+            case BRF:
+                {
+                    printf("BRF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
+            case BRT:
+                {
+                    printf("BRT %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
+                    PC++;
+                    break;
+                }
+            default:
+                {
+                    printf("Not defined!");
+                    PC++;
+                }
         }
     }
 
@@ -231,7 +286,6 @@ void listProgram(unsigned int instructions [], int instrSize){
 void executeProgram(unsigned int instructions [], int staticDataArea_size){
 
     while(instructions[PC] != HALT << 24){
-        int ins = instructions[PC];
         switch(instructions[PC] >> 24){
             case PUSHC:
                 {
@@ -298,6 +352,7 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
             case RDINT:
                 {
                     int num;
+                    printf("Please enter an integer number: \n");
                     scanf("%d",&num);
                     push(num);
                     PC++;
@@ -315,6 +370,7 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
             case RDCHR:
                 {
                     char character;
+                    printf("Please enter a character ascii code: \n");
                     scanf("%c",&character);
                     push(character);
                     PC++;
@@ -393,6 +449,128 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
                     int val = pop();
                     stack[FP + n] = val;
                     PC++;
+                    break;
+                }
+            case EQ:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 == num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case NE:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 != num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case LT:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 < num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case LE:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 <= num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case GT:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 > num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case GE:
+                {
+                    int num1 = pop();
+                    int num2 = pop();
+                    if(num2 >= num1){
+                        push(1);
+                    }
+                    else
+                    {
+                        push(0);
+                    }
+                    PC++;
+                    break;
+                }
+            case JMP:
+                {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    PC = n;
+                    break;
+                }
+            case BRF:
+                {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    int jump = pop();
+                    if(jump == 0){
+                        PC = n;
+                    }
+                    else if(jump == 1){
+                        PC++;
+                    }
+                    else {
+                        perror("No valid input for boolean (has to be '0' or '1'\n");
+                        PC++;
+                    }
+                    break;
+                }
+            case BRT:
+                {
+                    int n = (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF));
+                    int jump = pop();
+                    if(jump == 1){
+                        PC = n;
+                    }
+                    else if (jump == 0){
+                        PC++;
+                    }
+                    else {
+                        perror("No valid input for boolean (has to be '0' or '1'\n");
+                        PC++;
+                    }
                     break;
                 }
             default:
