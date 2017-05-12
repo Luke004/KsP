@@ -5,6 +5,7 @@
 #define ARG_PROG1 "--prog1"
 #define ARG_PROG2 "--prog2"
 #define ARG_PROG3 "--prog3"
+#define DEBUG_MODE "--debug"
 
 /* VM Version Info */
 #define NJVM_VERSION 3
@@ -42,8 +43,10 @@
 
 
 void printHelp(void);
-void loadProgram(const char filename[]);
+void loadProgram(const char filename[], int debug);
 void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int instructions [], int staticDataArea_size);
+void execInstruction(unsigned int instruction, int staticDataArea_size);
+void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps);
 void push(int number);
 int pop();
