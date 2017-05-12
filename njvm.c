@@ -64,235 +64,255 @@ void loadProgram(const char filename[], int debug) {
         unsigned int instr;
 
         /*Read first 4 bytes and check them for correct format */
-        format = (char*) malloc (4);
+        format = (char *) malloc(4);
         fread(format, 1, 4, program);
-        if(strcmp(format, expectedString) != 0){
+        if (strcmp(format, expectedString) != 0) {
             perror("Incorrect Format!\n");
-        }
-        else {
+        } else {
             /*Read next 4 bytes and check them for correct Version */
             fread(&version, 4, 1, program);
-            if(version != NJVM_VERSION){
+            if (version != NJVM_VERSION) {
                 perror("Incorrect Version!\n");
-            }
-            else {
+            } else {
                 /*Read next 4 bytes and check for the number of instructions */
                 fread(&instrSize, 4, 1, program);
-                instructions = (unsigned int*) malloc(instrSize * sizeof(int));
+                instructions = (unsigned int *) malloc(instrSize * sizeof(int));
 
                 /*Read next 4 bytes and check for the number of vars in static data area*/
                 fread(&numVars, 4, 1, program);
-                staticDataArea = (int*)malloc(numVars * sizeof(int));
+                staticDataArea = (int *) malloc(numVars * sizeof(int));
 
                 /*Read the next 4 bytes n times (based on instrSize) */
                 do {
                     fread(&instr, 4, 1, program);
                     instructions[PC] = instr;
-                    PC ++;
-                }
-                while (PC < instrSize);
+                    PC++;
+                } while (PC < instrSize);
 
                 PC = 0;
                 SP = 0;
 
-
-
-                if(debug == 1){
-                    printf("DEBUG: file %c loaded ", filename);
+                if (debug == 1) {
+                    char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
+                    printf("DEBUG: file %s loaded ", filename);
                     printf("(code size = %d, ", instrSize);
                     printf("data size = %d)\n", numVars);
                     printf("Ninja Virtual Machine started\n");
-                    makeDebugStep(instructions, numVars, 5);
+                    printf("%d: ", PC);
+
+                    makeDebugStep(instructions, numVars, 1);
+                    printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
+                    char *input = malloc(10000);
+                    scanf("%s", input);
+
+                    while (strcmp(input, commands[5]) != 0) {
+                        if (strcmp(input, commands[0]) == 0) {
+                            /*inspect */
+                            scanf("%s", input);
+                        } else if (strcmp(input, commands[1]) == 0) {
+                            /*list */
+                            scanf("%s", input);
+                        } else if (strcmp(input, commands[2]) == 0) {
+                            /*breakpoint */
+                            scanf("%s", input);
+                        } else if (strcmp(input, commands[3]) == 0) {
+                            /*step */
+                            scanf("%s", input);
+                        } else if (strcmp(input, commands[4]) == 0) {
+                            /*run */
+                            scanf("%s", input);
+                        } else {
+                            printf("Invalid command! \n");
+                            scanf("%s", input);
+                        }
+                    }
                 }
-                else
-                {
-                    printf("Ninja Virtual Machine started\n");
+                else {
+                    printf("Ninja Virtual Machine started ..\n");
                     executeProgram(instructions, numVars);
-
                 }
-
                 printf("Ninja Virtual Machine stopped ..\n");
-
                 fclose(program);
             }
-
         }
-
-
-
-
     }
 }
+
+
 
 void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
-        switch(instructions[PC] >> 24) {
-            case HALT:
-                {
-                    printf("HALT\n");
-                    PC++;
-                    break;
-                }
-            case PUSHC:
-                {
-                    printf("PUSHC %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-
-                }
-            case ADD:
-                {
-                    printf("ADD\n");
-                    PC++;
-                    break;
-                }
-            case SUB:
-                {
-                    printf("SUB\n");
-                    PC++;
-                    break;
-                }
-            case MUL:
-                {
-                    printf("MUL\n");
-                    PC++;
-                    break;
-                }
-            case DIV:
-                {
-                    printf("DIV\n");
-                    PC++;
-                    break;
-                }
-            case MOD:
-                {
-                    printf("MOD\n");
-                    PC++;
-                    break;
-                }
-            case RDINT:
-                {
-                    printf("RDINT\n");
-                    PC++;
-                    break;
-                }
-            case WRINT:
-                {
-                    printf("WRINT\n");
-                    PC++;
-                    break;
-                }
-            case RDCHR:
-                {
-                    printf("RDCHAR\n");
-                    PC++;
-                    break;
-                }
-            case WRCHR:
-                {
-                    printf("WRCHAR\n");
-                    PC++;
-                    break;
-                }
-            case PUSHG:
-                {
-                    printf("PUSHG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case POPG:
-                {
-                    printf("POPG %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case ASF:
-                {
-                    printf("ASF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case RSF:
-                {
-                    printf("RSF\n");
-                    PC++;
-                    break;
-                }
-            case PUSHL:
-                {
-                    printf("PUSHL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case POPL:
-                {
-                    printf("POPL %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case EQ:
-                {
-                    printf("EQ\n");
-                    PC++;
-                    break;
-                }
-            case NE:
-                {
-                    printf("NE\n");
-                    PC++;
-                    break;
-                }
-            case LT:
-                {
-                    printf("LT\n");
-                    PC++;
-                    break;
-                }
-            case LE:
-                {
-                    printf("LE\n");
-                    PC++;
-                    break;
-                }
-            case GT:
-                {
-                    printf("GT\n");
-                    PC++;
-                    break;
-                }
-            case GE:
-                {
-                    printf("GE\n");
-                    PC++;
-                    break;
-                }
-            case JMP:
-                {
-                    printf("JMP %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case BRF:
-                {
-                    printf("BRF %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            case BRT:
-                {
-                    printf("BRT %d\n", (SIGN_EXTEND(instructions[PC] & 0x00FFFFFF)));
-                    PC++;
-                    break;
-                }
-            default:
-                {
-                    printf("Not defined!");
-                    PC++;
-                }
-        }
+        listInstruction(instructions[PC]);
     }
 
+}
+
+void listInstruction(unsigned int instruction){
+    switch(instruction >> 24) {
+        case HALT:
+        {
+            printf("HALT\n");
+            PC++;
+            break;
+        }
+        case PUSHC:
+        {
+            printf("PUSHC %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+
+        }
+        case ADD:
+        {
+            printf("ADD\n");
+            PC++;
+            break;
+        }
+        case SUB:
+        {
+            printf("SUB\n");
+            PC++;
+            break;
+        }
+        case MUL:
+        {
+            printf("MUL\n");
+            PC++;
+            break;
+        }
+        case DIV:
+        {
+            printf("DIV\n");
+            PC++;
+            break;
+        }
+        case MOD:
+        {
+            printf("MOD\n");
+            PC++;
+            break;
+        }
+        case RDINT:
+        {
+            printf("RDINT\n");
+            PC++;
+            break;
+        }
+        case WRINT:
+        {
+            printf("WRINT\n");
+            PC++;
+            break;
+        }
+        case RDCHR:
+        {
+            printf("RDCHAR\n");
+            PC++;
+            break;
+        }
+        case WRCHR:
+        {
+            printf("WRCHAR\n");
+            PC++;
+            break;
+        }
+        case PUSHG:
+        {
+            printf("PUSHG %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case POPG:
+        {
+            printf("POPG %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case ASF:
+        {
+            printf("ASF %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case RSF:
+        {
+            printf("RSF\n");
+            PC++;
+            break;
+        }
+        case PUSHL:
+        {
+            printf("PUSHL %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case POPL:
+        {
+            printf("POPL %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case EQ:
+        {
+            printf("EQ\n");
+            PC++;
+            break;
+        }
+        case NE:
+        {
+            printf("NE\n");
+            PC++;
+            break;
+        }
+        case LT:
+        {
+            printf("LT\n");
+            PC++;
+            break;
+        }
+        case LE:
+        {
+            printf("LE\n");
+            PC++;
+            break;
+        }
+        case GT:
+        {
+            printf("GT\n");
+            PC++;
+            break;
+        }
+        case GE:
+        {
+            printf("GE\n");
+            PC++;
+            break;
+        }
+        case JMP:
+        {
+            printf("JMP %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case BRF:
+        {
+            printf("BRF %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case BRT:
+        {
+            printf("BRT %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        default:
+        {
+            printf("Not defined!");
+            PC++;
+        }
+    }
 }
 
 void executeProgram(unsigned int instructions [], int staticDataArea_size){
@@ -303,7 +323,8 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
 
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
     while (instructions[PC] != HALT << 24 && steps != 0) {
-        execInstruction(instructions[PC], staticDataArea_size);
+        execInstruction(instructions[PC--], staticDataArea_size);
+        listInstruction(instructions[PC]);
         steps--;
     }
 }

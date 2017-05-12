@@ -47,6 +47,7 @@ void loadProgram(const char filename[], int debug);
 void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int instructions [], int staticDataArea_size);
 void execInstruction(unsigned int instruction, int staticDataArea_size);
+void listInstruction(unsigned int instruction);
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps);
 void push(int number);
 int pop();
