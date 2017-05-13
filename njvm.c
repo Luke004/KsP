@@ -94,15 +94,13 @@ void loadProgram(const char filename[], int debug) {
 
                 if (debug == 1) {
                     char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
+                    char *input = (char*) malloc(12);
                     printf("DEBUG: file %s loaded ", filename);
                     printf("(code size = %d, ", instrSize);
                     printf("data size = %d)\n", numVars);
                     printf("Ninja Virtual Machine started\n");
-                    printf("%d: ", PC);
-
                     listInstruction(instructions[PC--]);
                     printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
-                    char *input = malloc(10000);
                     scanf("%s", input);
 
                     while (strcmp(input, commands[5]) != 0) {
