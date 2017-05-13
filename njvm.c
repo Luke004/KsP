@@ -100,7 +100,7 @@ void loadProgram(const char filename[], int debug) {
                     printf("Ninja Virtual Machine started\n");
                     printf("%d: ", PC);
 
-                    makeDebugStep(instructions, numVars, 1);
+                    listInstruction(instructions[PC--]);
                     printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
                     char *input = malloc(10000);
                     scanf("%s", input);
@@ -108,19 +108,60 @@ void loadProgram(const char filename[], int debug) {
                     while (strcmp(input, commands[5]) != 0) {
                         if (strcmp(input, commands[0]) == 0) {
                             /*inspect */
+                            printf("DEBUG [inspect]: stack, data?\n");
                             scanf("%s", input);
+                            if(strcmp(input, "stack") == 0) {
+                                int SP_output = SP;
+                                if(FP == SP){
+                                    printf("FP, SP --> [%d]: xxx\n",SP_output);
+                                    SP_output--;
+                                }
+                                else {
+                                    printf("SP   -->   [%d]: xxx\n", SP_output);
+                                    SP_output--;
+                                }
+                                do{
+                                    if(FP == SP_output) {
+                                        printf("FP    -->  [%d]: ", FP);
+                                        printf("%d\n", stack[FP]);
+                                    }
+                                    else if(SP_output >= 0){
+                                        printf("           [%d]: ", SP_output);
+                                        printf("%d\n", stack[SP_output]);
+                                    }
+                                    SP_output--;
+                                }while (SP_output >= 0);
+                                printf(" -- bottom of stack --\n");
+                                listInstruction(instructions[PC--]);
+                                printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
+                                scanf("%s", input);
+                            } else if(strcmp(input, "data") == 0) {
+
+                            }
                         } else if (strcmp(input, commands[1]) == 0) {
                             /*list */
+                            int temp = PC;
+                            PC = 0;
+                            listProgram(instructions,instrSize);
+                            PC = temp;
+                            printf(" --- end of list ---\n");
+                            listInstruction(instructions[--PC]);
+                            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
                             scanf("%s", input);
                         } else if (strcmp(input, commands[2]) == 0) {
                             /*breakpoint */
                             scanf("%s", input);
                         } else if (strcmp(input, commands[3]) == 0) {
                             /*step */
+                            makeDebugStep(instructions, numVars, 1);
+                            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
                             scanf("%s", input);
                         } else if (strcmp(input, commands[4]) == 0) {
                             /*run */
-                            scanf("%s", input);
+                            executeProgram(instructions, numVars);
+                            fclose(program);
+                            printf("Ninja Virtual Machine stopped\n");
+                            exit(EXIT_SUCCESS);
                         } else {
                             printf("Invalid command! \n");
                             scanf("%s", input);
@@ -128,10 +169,10 @@ void loadProgram(const char filename[], int debug) {
                     }
                 }
                 else {
-                    printf("Ninja Virtual Machine started ..\n");
+                    printf("Ninja Virtual Machine started\n");
                     executeProgram(instructions, numVars);
                 }
-                printf("Ninja Virtual Machine stopped ..\n");
+                printf("Ninja Virtual Machine stopped\n");
                 fclose(program);
             }
         }
@@ -323,8 +364,8 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
 
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
     while (instructions[PC] != HALT << 24 && steps != 0) {
-        execInstruction(instructions[PC--], staticDataArea_size);
-        listInstruction(instructions[PC]);
+        execInstruction(instructions[PC], staticDataArea_size);
+        listInstruction(instructions[PC--]);
         steps--;
     }
 }
