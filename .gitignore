@@ -6,3 +6,4 @@ CMakeLists.txt
 njvm
 compile
 nja
+*.bin
