@@ -10,7 +10,6 @@ int PC; /*program counter */
 int SP; /*stack pointer */
 int FP; /*frame pointer */
 int *staticDataArea; /*static data area (for global vars) */
-int a = 6 + - 3 ;
 
 
 int main(int argc, char *argv [])
@@ -52,7 +51,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[], int debug) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/newprog2", "r");   /*"r" for reading */
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -373,7 +372,7 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
     switch(instruction_binary >> 24){
         case PUSHC:
         {
-            push((SIGN_EXTEND(instruction_binary & 0x00FFFFFF)));
+            push(opcode(instruction_binary));
             PC++;
             break;
         }
