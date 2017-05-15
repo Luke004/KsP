@@ -50,8 +50,8 @@ void printHelp(void)
     printf("\n");
 }
 
-void loadProgram(const char filename[], int debug) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1", "r");   /*"r" for reading */
+void loadProgram(const char filename[], bool debug  ) {
+    FILE *program = fopen("prog4.bin", "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -62,6 +62,7 @@ void loadProgram(const char filename[], int debug) {
         unsigned int *instructions; /*unsigned Integer containing the instructions */
         int numVars;
         unsigned int instr;
+        int i = 0;
 
         /*Read first 4 bytes and check them for correct format */
         format = (char *) malloc(4);
@@ -71,8 +72,8 @@ void loadProgram(const char filename[], int debug) {
         } else {
             /*Read next 4 bytes and check them for correct Version */
             fread(&version, 4, 1, program);
-            if (version != NJVM_VERSION) {
-                perror("Incorrect Version!\n");
+            if (version > NJVM_VERSION) {
+                perror("Your Version is too old!\n");
             } else {
                 /*Read next 4 bytes and check for the number of instructions */
                 fread(&instrSize, 4, 1, program);
@@ -85,14 +86,14 @@ void loadProgram(const char filename[], int debug) {
                 /*Read the next 4 bytes n times (based on instrSize) */
                 do {
                     fread(&instr, 4, 1, program);
-                    instructions[PC] = instr;
-                    PC++;
-                } while (PC < instrSize);
+                    instructions[i] = instr;
+                    i++;
+                } while (i < instrSize);
 
                 PC = 0;
                 SP = 0;
 
-                if (debug == 1) {
+                if (debug == true) {
                     char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
                     char *input = (char*) malloc(12);
                     printf("DEBUG: file %s loaded ", filename);
