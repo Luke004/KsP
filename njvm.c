@@ -10,6 +10,7 @@ int PC; /*program counter */
 int SP; /*stack pointer */
 int FP; /*frame pointer */
 int *staticDataArea; /*static data area (for global vars) */
+int a = 6 + - 3 ;
 
 
 int main(int argc, char *argv [])
@@ -355,24 +356,24 @@ void listInstruction(unsigned int instruction){
 }
 
 void executeProgram(unsigned int instructions [], int staticDataArea_size){
-    while(instructions[PC] != HALT << 24){
+    while(instructions[PC] != HALT){
         execInstruction(instructions[PC], staticDataArea_size);
     }
 }
 
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
-    while (instructions[PC] != HALT << 24 && steps != 0) {
+    while (instructions[PC] != HALT && steps != 0) {
         execInstruction(instructions[PC], staticDataArea_size);
         listInstruction(instructions[PC--]);
         steps--;
     }
 }
 
-void execInstruction(unsigned int instruction, int staticDataArea_size){
-    switch(instruction >> 24){
+void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
+    switch(instruction_binary >> 24){
         case PUSHC:
         {
-            push((SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            push((SIGN_EXTEND(instruction_binary & 0x00FFFFFF)));
             PC++;
             break;
         }
@@ -469,7 +470,7 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case PUSHG:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
+            int n = opcode(instruction_binary);
             if(n >= staticDataArea_size || n < 0){
                 perror("Out of bounds. You're not pointing to an index within the static data area!\n");
             }
@@ -481,7 +482,7 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case POPG:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
+            int n = opcode(instruction_binary);
             if(n >=  staticDataArea_size || n < 0){
                 perror("Out of bounds. You're not pointing to an index within the static data area!\n");
             }
@@ -494,7 +495,7 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case ASF:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
+            int n = opcode(instruction_binary);
             if(n > STACK_SIZE - 2){
                 perror("Stack is too small to hold this stack frame!\n");
             } else if (n <= 0){
@@ -516,7 +517,7 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case PUSHL:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
+            int n = opcode(instruction_binary);
             if(n >= SP - FP || n < 0){
                 perror("Out of bounds. You're not pointing to an index within the stack frame!\n");
             }
@@ -528,9 +529,8 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case POPL:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
             int val = pop();
-            stack[FP + n] = val;
+            stack[FP + opcode(instruction_binary)] = val;
             PC++;
             break;
         }
@@ -620,16 +620,14 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case JMP:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
-            PC = n;
+            PC = opcode(instruction_binary);;
             break;
         }
         case BRF:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
             int jump = pop();
             if(jump == 0){
-                PC = n;
+                PC = opcode(instruction_binary);;
             }
             else if(jump == 1){
                 PC++;
@@ -642,10 +640,9 @@ void execInstruction(unsigned int instruction, int staticDataArea_size){
         }
         case BRT:
         {
-            int n = (SIGN_EXTEND(instruction & 0x00FFFFFF));
             int jump = pop();
             if(jump == 1){
-                PC = n;
+                PC = opcode(instruction_binary);
             }
             else if (jump == 0){
                 PC++;
@@ -681,4 +678,8 @@ void push(int number){
 
 int pop (){
     return stack[--SP];
+}
+
+int opcode(int binary) {
+    return (SIGN_EXTEND(binary & 0x00FFFFFF));
 }

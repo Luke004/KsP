@@ -42,12 +42,14 @@
 #define STACK_SIZE 10000
 
 
+
 void printHelp(void);
 void loadProgram(const char filename[], int debug);
 void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int instructions [], int staticDataArea_size);
-void execInstruction(unsigned int instruction, int staticDataArea_size);
+void execInstruction(unsigned int instruction_binary, int staticDataArea_size);
 void listInstruction(unsigned int instruction);
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps);
+int opcode(int binary);
 void push(int number);
 int pop();
