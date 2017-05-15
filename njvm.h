@@ -10,6 +10,11 @@
 /* VM Version Info */
 #define NJVM_VERSION 3
 
+/*make boolean type */
+typedef int bool;
+#define true 1
+#define false 0
+
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
