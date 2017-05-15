@@ -8,4 +8,5 @@ mul
 wrint
 pushc	10
 wrchr
+rdint
 halt
