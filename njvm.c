@@ -29,10 +29,10 @@ int main(int argc, char *argv [])
         }
         else if(argc == 3 && strcmp(argv[2], DEBUG_MODE) == 0)
         {
-            loadProgram(argv[1],1);
+            loadProgram(argv[1],true);
         }
         else {
-            loadProgram(argv[1],0);
+            loadProgram(argv[1],false);
         }
 
   }
@@ -41,17 +41,24 @@ int main(int argc, char *argv [])
   
 }
 
+/*
+ * prints a simple help screen
+ */
 void printHelp(void)
 {
-	printf("Usage: njvm [option] [option] ... \n");
-	printf("Arguments: \n");
-	printf("%s\tShows the current version of njvm.\n", ARG_VERSION);
-	printf("%s\t\tShows this help screen.\n", ARG_HELP);
+    printf("Execute Programs:\n");
+    printf("njvm [program]\t\t\t executes a program\n");
+    printf("njvm [program] %s\t executes a program in debug mode\n", DEBUG_MODE);
+    printf("\n");
+    printf("Direct Arguments: \n");
+	printf("njvm %s\tShows the current version of njvm.\n", ARG_VERSION);
+	printf("njvm %s\t\tShows this help screen.\n", ARG_HELP);
+
     printf("\n");
 }
 
 void loadProgram(const char filename[], bool debug  ) {
-    FILE *program = fopen("prog4.bin", "r");   /*"r" for reading */
+    FILE *program = fopen(filename, "r");   /*"r" for reading */
     if (program == NULL) {
         perror("File not found! ");
     } else {
@@ -179,7 +186,9 @@ void loadProgram(const char filename[], bool debug  ) {
 }
 
 
-
+/*
+ * prints all instructions in programm
+ */
 void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
@@ -188,6 +197,9 @@ void listProgram(unsigned int instructions [], int instrSize){
 
 }
 
+/*
+ * converts instruction to string and pints it
+ */
 void listInstruction(unsigned int instruction){
     switch(instruction >> 24) {
         case HALT:
@@ -355,12 +367,18 @@ void listInstruction(unsigned int instruction){
     }
 }
 
+/*
+ * executes all instructions
+ */
 void executeProgram(unsigned int instructions [], int staticDataArea_size){
     while(instructions[PC] != HALT){
         execInstruction(instructions[PC], staticDataArea_size);
     }
 }
 
+/*
+ * pls add description
+ */
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
     while (instructions[PC] != HALT && steps != 0) {
         execInstruction(instructions[PC], staticDataArea_size);
@@ -369,6 +387,9 @@ void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int st
     }
 }
 
+/*
+ * executes single instruction
+ */
 void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
     switch(instruction_binary >> 24){
         case PUSHC:
