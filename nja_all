@@ -1,0 +1,3 @@
+for f in progs/*.asm ; do ./nja "$f" "${f%%.*}".bin ; done
+
+for f in progs/*.bin ; do mv "$f" .  ; done

@@ -1,0 +1,2 @@
+for f in *.bin ; do rm "$f" ; done
+for f in progs/*.bin ; do rm "$f" ; done
