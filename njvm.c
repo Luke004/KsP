@@ -117,17 +117,17 @@ void loadProgram(const char filename[], bool debug  ) {
         printf("data size = %d)\n", numVars);
 
         printf("Ninja Virtual Machine started\n");
-        printf(debugInfo);
-
-        scanf("%s", input);
 
         /* performs one step after another till user writes "run" represented by commands[5] */
         while (strcmp(input, commands[5]) != 0) {
 
+            printf(debugInfo);
+            scanf("%s", input);
+
             /* inspect */
             if (strcmp(input, commands[0]) == 0)
             {
-                printf(debugInfo);
+                printf("DEBUG [inspect]: stack, data?\n");
                 scanf("%s", input);
 
                 /* inspect stack */
@@ -154,13 +154,10 @@ void loadProgram(const char filename[], bool debug  ) {
                     }while (SP_output >= 0);
                     printf(" -- bottom of stack --\n");
                     listInstruction(instructions[PC--]);
-                    printf(debugInfo);
-                    scanf("%s", input);
                 }
 
                 /* inspect data */
                 else if(strcmp(input, "data") == 0) {
-
                 }
                 continue;
             }
@@ -174,22 +171,17 @@ void loadProgram(const char filename[], bool debug  ) {
                 PC = temp;
                 printf(" --- end of list ---\n");
                 listInstruction(instructions[--PC]);
-                printf(debugInfo);
-                scanf("%s", input);
                 continue;
             }
 
             /* breakpoint */
             if (strcmp(input, commands[2]) == 0) {
-                scanf("%s", input);
                 continue;
             }
 
             /* step     */
             else if (strcmp(input, commands[3]) == 0) {
                 makeDebugStep(instructions, numVars, 1);
-                printf(debugInfo);
-                scanf("%s", input);
                 continue;
             }
 
@@ -199,12 +191,6 @@ void loadProgram(const char filename[], bool debug  ) {
                 fclose(program);
                 printf("Ninja Virtual Machine stopped\n");
                 exit(EXIT_SUCCESS);
-            }
-
-            /* unknown input, retry     */
-            else {
-                printf("Invalid command! \n");
-                scanf("%s", input);
             }
         }
     }
