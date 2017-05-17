@@ -110,7 +110,6 @@ void loadProgram(const char filename[], bool debug  ) {
 
     if (debug == true) {
         char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
-        char *debugInfo = "\"DEBUG: inspect, list, breakpoint, step, run, quit?\n";
         char *input = (char*) malloc(12);
         printf("DEBUG: file %s loaded ", filename);
         printf("(code size = %d, ", instrSize);
@@ -121,7 +120,7 @@ void loadProgram(const char filename[], bool debug  ) {
         /* performs one step after another till user writes "run" represented by commands[5] */
         while (strcmp(input, commands[5]) != 0) {
 
-            printf(debugInfo);
+            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
             scanf("%s", input);
 
             /* inspect */
