@@ -9,7 +9,9 @@ int stack [STACK_SIZE]; /*stack */
 int PC; /*program counter */
 int SP; /*stack pointer */
 int FP; /*frame pointer */
-int *staticDataArea; /*static data area (for global vars) */
+int *staticDataArea; /*static data area (holds global vars) */
+ReturnRegister returnRegister; /*return value register (holds method return values) */
+int RP; /*return register pointer */
 
 
 int main(int argc, char *argv [])
@@ -107,6 +109,7 @@ void loadProgram(const char filename[], bool debug  ) {
 
     PC = 0;
     SP = 0;
+    RP = 0;
 
     if (debug == true) {
         char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
@@ -627,12 +630,7 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         case PUSHL:
         {
             int n = opcode(instruction_binary);
-            if(n >= SP - FP || n < 0){
-                perror("Out of bounds. You're not pointing to an index within the stack frame!\n");
-            }
-            else {
-                push(stack[FP + n]);
-            }
+            push(stack[FP + n]);
             PC++;
             break;
         }
@@ -776,19 +774,24 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         }
         case DROP:
         {
-            printf("DROP %d\n", (SIGN_EXTEND(instruction_binary & 0x00FFFFFF)));
+            int n = opcode(instruction_binary);
+            int i = 0;
+            while(i < n){
+                pop();
+                i++;
+            }
             PC++;
             break;
         }
         case PUSHR:
         {
-            printf("BRT \n");
+            push(returnRegister.this[--returnRegister.size]);
             PC++;
             break;
         }
         case POPR:
         {
-            printf("BRT \n");
+            returnRegister.this[returnRegister.size++] = pop();
             PC++;
             break;
         }

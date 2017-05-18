@@ -7,6 +7,10 @@
 #define ARG_PROG3 "--prog3"
 #define DEBUG_MODE "--debug"
 
+#define IMMEDIATE(x) ((x) & 0x00FFFFFF)
+#define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
+#define STACK_SIZE 10000
+
 /* VM Version Info */
 #define NJVM_VERSION 4
 
@@ -14,6 +18,11 @@
 typedef int bool;
 #define true 1
 #define false 0
+
+typedef struct {
+    int this[STACK_SIZE];
+    int size;
+} ReturnRegister;
 
 #define HALT 0
 #define PUSHC 1
@@ -48,9 +57,6 @@ typedef int bool;
 #define POPR 30
 #define DUP 31
 
-#define IMMEDIATE(x) ((x) & 0x00FFFFFF)
-#define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
-#define STACK_SIZE 10000
 
 
 
