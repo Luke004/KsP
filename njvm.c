@@ -29,10 +29,10 @@ int main(int argc, char *argv [])
         }
         else if(argc == 3 && strcmp(argv[2], DEBUG_MODE) == 0)
         {
-            loadProgram(argv[1],1);
+            loadProgram(argv[1],true);
         }
         else {
-            loadProgram(argv[1],0);
+            loadProgram(argv[1],false);
         }
 
   }
@@ -41,145 +41,175 @@ int main(int argc, char *argv [])
   
 }
 
+/*
+ * prints a simple help screen
+ */
 void printHelp(void)
 {
-	printf("Usage: njvm [option] [option] ... \n");
-	printf("Arguments: \n");
-	printf("%s\tShows the current version of njvm.\n", ARG_VERSION);
-	printf("%s\t\tShows this help screen.\n", ARG_HELP);
+    printf("Execute Programs:\n");
+    printf("njvm [program]\t\t\t executes a program\n");
+    printf("njvm [program] %s\t executes a program in debug mode\n", DEBUG_MODE);
+    printf("\n");
+    printf("Direct Arguments: \n");
+	printf("njvm %s\tShows the current version of njvm.\n", ARG_VERSION);
+	printf("njvm %s\t\tShows this help screen.\n", ARG_HELP);
+
     printf("\n");
 }
 
 void loadProgram(const char filename[], bool debug  ) {
-    FILE *program = fopen("prog4.bin", "r");   /*"r" for reading */
+    FILE *program = fopen(filename, "r");   /*"r" for reading */
+    char *format;
+    char *expectedString = "NJBF";
+    int version;
+    int instrSize;
+    unsigned int *instructions; /*unsigned Integer containing the instructions */
+    int numVars;
+    unsigned int instr;
+    int i;
+
+    /* return if program does not exist */
     if (program == NULL) {
         perror("File not found! ");
-    } else {
-        char *format;
-        char *expectedString = "NJBF";
-        int version;
-        int instrSize;
-        unsigned int *instructions; /*unsigned Integer containing the instructions */
-        int numVars;
-        unsigned int instr;
-        int i = 0;
+        exit(EXIT_FAILURE);
+    }
 
-        /*Read first 4 bytes and check them for correct format */
-        format = (char *) malloc(4);
-        fread(format, 1, 4, program);
-        if (strcmp(format, expectedString) != 0) {
-            perror("Incorrect Format!\n");
-        } else {
-            /*Read next 4 bytes and check them for correct Version */
-            fread(&version, 4, 1, program);
-            if (version > NJVM_VERSION) {
-                perror("Your Version is too old!\n");
-            } else {
-                /*Read next 4 bytes and check for the number of instructions */
-                fread(&instrSize, 4, 1, program);
-                instructions = (unsigned int *) malloc(instrSize * sizeof(int));
+    /*Read first 4 bytes and check them for correct format */
+    format = (char *) malloc(4);
+    fread(format, 1, 4, program);
+    if (strcmp(format, expectedString) != 0) {
+        perror("Incorrect Format!\n");
+        exit(EXIT_FAILURE);
+    }
 
-                /*Read next 4 bytes and check for the number of vars in static data area*/
-                fread(&numVars, 4, 1, program);
-                staticDataArea = (int *) malloc(numVars * sizeof(int));
+    /*Read next 4 bytes and check them for correct Version */
+    fread(&version, 4, 1, program);
+    if (version > NJVM_VERSION) {
+        perror("Your Version is too old!\n");
+        exit(EXIT_FAILURE);
+    }
 
-                /*Read the next 4 bytes n times (based on instrSize) */
-                do {
-                    fread(&instr, 4, 1, program);
-                    instructions[i] = instr;
-                    i++;
-                } while (i < instrSize);
+    /*Read next 4 bytes and check for the number of instructions */
+    fread(&instrSize, 4, 1, program);
+    instructions = (unsigned int *) malloc(instrSize * sizeof(int));
 
-                PC = 0;
-                SP = 0;
+    /*Read next 4 bytes and check for the number of vars in static data area*/
+    fread(&numVars, 4, 1, program);
+    staticDataArea = (int *) malloc(numVars * sizeof(int));
 
-                if (debug == true) {
-                    char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
-                    char *input = (char*) malloc(12);
-                    printf("DEBUG: file %s loaded ", filename);
-                    printf("(code size = %d, ", instrSize);
-                    printf("data size = %d)\n", numVars);
-                    printf("Ninja Virtual Machine started\n");
-                    listInstruction(instructions[PC--]);
-                    printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
-                    scanf("%s", input);
+    /*Read the next 4 bytes n times (based on instrSize) */
+    i = 0;
+    do {
+        fread(&instr, 4, 1, program);
+        instructions[i] = instr;
+        i++;
+    } while (i < instrSize);
 
-                    while (strcmp(input, commands[5]) != 0) {
-                        if (strcmp(input, commands[0]) == 0) {
-                            /*inspect */
-                            printf("DEBUG [inspect]: stack, data?\n");
-                            scanf("%s", input);
-                            if(strcmp(input, "stack") == 0) {
-                                int SP_output = SP;
-                                if(FP == SP){
-                                    printf("FP, SP --> [%d]: xxx\n",SP_output);
-                                    SP_output--;
-                                }
-                                else {
-                                    printf("SP   -->   [%d]: xxx\n", SP_output);
-                                    SP_output--;
-                                }
-                                do{
-                                    if(FP == SP_output) {
-                                        printf("FP    -->  [%d]: ", FP);
-                                        printf("%d\n", stack[FP]);
-                                    }
-                                    else if(SP_output >= 0){
-                                        printf("           [%d]: ", SP_output);
-                                        printf("%d\n", stack[SP_output]);
-                                    }
-                                    SP_output--;
-                                }while (SP_output >= 0);
-                                printf(" -- bottom of stack --\n");
-                                listInstruction(instructions[PC--]);
-                                printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
-                                scanf("%s", input);
-                            } else if(strcmp(input, "data") == 0) {
+    PC = 0;
+    SP = 0;
 
-                            }
-                        } else if (strcmp(input, commands[1]) == 0) {
-                            /*list */
-                            int temp = PC;
-                            PC = 0;
-                            listProgram(instructions,instrSize);
-                            PC = temp;
-                            printf(" --- end of list ---\n");
-                            listInstruction(instructions[--PC]);
-                            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
-                            scanf("%s", input);
-                        } else if (strcmp(input, commands[2]) == 0) {
-                            /*breakpoint */
-                            scanf("%s", input);
-                        } else if (strcmp(input, commands[3]) == 0) {
-                            /*step */
-                            makeDebugStep(instructions, numVars, 1);
-                            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
-                            scanf("%s", input);
-                        } else if (strcmp(input, commands[4]) == 0) {
-                            /*run */
-                            executeProgram(instructions, numVars);
-                            fclose(program);
-                            printf("Ninja Virtual Machine stopped\n");
-                            exit(EXIT_SUCCESS);
-                        } else {
-                            printf("Invalid command! \n");
-                            scanf("%s", input);
-                        }
+    if (debug == true) {
+        char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
+        char *input = (char*) malloc(12);
+        printf("DEBUG: file %s loaded ", filename);
+        printf("(code size = %d, ", instrSize);
+        printf("data size = %d)\n", numVars);
+
+        printf("Ninja Virtual Machine started\n");
+
+        /* performs one step after another till user writes "run" represented by commands[5] */
+        while (strcmp(input, commands[5]) != 0) {
+
+            printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
+            scanf("%s", input);
+
+            /* inspect */
+            if (strcmp(input, commands[0]) == 0)
+            {
+                printf("DEBUG [inspect]: stack, data?\n");
+                scanf("%s", input);
+
+                /* inspect stack */
+                if(strcmp(input, "stack") == 0) {
+                    int SP_output = SP;
+                    if(FP == SP){
+                        printf("FP, SP --> [%d]: xxx\n",SP_output);
+                        SP_output--;
                     }
+                    else {
+                        printf("SP   -->   [%d]: xxx\n", SP_output);
+                        SP_output--;
+                    }
+                    do{
+                        if(FP == SP_output) {
+                            printf("FP    -->  [%d]: ", FP);
+                            printf("%d\n", stack[FP]);
+                        }
+                        else if(SP_output >= 0){
+                            printf("           [%d]: ", SP_output);
+                            printf("%d\n", stack[SP_output]);
+                        }
+                        SP_output--;
+                    }while (SP_output >= 0);
+                    printf(" -- bottom of stack --\n");
+                    listInstruction(instructions[PC--]);
                 }
-                else {
-                    printf("Ninja Virtual Machine started\n");
-                    executeProgram(instructions, numVars);
+
+                /* inspect data */
+                else if(strcmp(input, "data") == 0) {
                 }
-                printf("Ninja Virtual Machine stopped\n");
+                continue;
+            }
+
+            /* list */
+            if (strcmp(input, commands[1]) == 0) {
+
+                int temp = PC;
+                PC = 0;
+                listProgram(instructions,instrSize);
+                PC = temp;
+                printf(" --- end of list ---\n");
+                listInstruction(instructions[--PC]);
+                continue;
+            }
+
+            /* breakpoint */
+            if (strcmp(input, commands[2]) == 0) {
+                continue;
+            }
+
+            /* step     */
+            else if (strcmp(input, commands[3]) == 0) {
+                makeDebugStep(instructions, numVars, 1);
+                continue;
+            }
+
+            /* run      */
+            else if (strcmp(input, commands[4]) == 0) {
+                executeProgram(instructions, numVars);
                 fclose(program);
+                printf("Ninja Virtual Machine stopped\n");
+                exit(EXIT_SUCCESS);
             }
         }
     }
+
+    /* debug = false ->> execute program normal */
+    else {
+        printf("Ninja Virtual Machine started\n");
+        executeProgram(instructions, numVars);
+    }
+
+    /* finish execution */
+    printf("Ninja Virtual Machine stopped\n");
+    fclose(program);
 }
 
 
 
+/*
+ * prints all instructions in programm
+ */
 void listProgram(unsigned int instructions [], int instrSize){
 
     while(PC < instrSize){
@@ -188,6 +218,9 @@ void listProgram(unsigned int instructions [], int instrSize){
 
 }
 
+/*
+ * converts instruction to string and prints it
+ */
 void listInstruction(unsigned int instruction){
     switch(instruction >> 24) {
         case HALT:
@@ -355,12 +388,18 @@ void listInstruction(unsigned int instruction){
     }
 }
 
+/*
+ * executes all instructions
+ */
 void executeProgram(unsigned int instructions [], int staticDataArea_size){
     while(instructions[PC] != HALT){
         execInstruction(instructions[PC], staticDataArea_size);
     }
 }
 
+/*
+ * pls add description
+ */
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
     while (instructions[PC] != HALT && steps != 0) {
         execInstruction(instructions[PC], staticDataArea_size);
@@ -369,6 +408,9 @@ void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int st
     }
 }
 
+/*
+ * executes single instruction
+ */
 void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
     switch(instruction_binary >> 24){
         case PUSHC:
