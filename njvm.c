@@ -58,7 +58,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[], bool debug  ) {
-    FILE *program = fopen(filename, "r");   /*"r" for reading */
+    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1.bin", "r");   /*"r" for reading */
     char *format;
     char *expectedString = "NJBF";
     int version;
@@ -117,9 +117,10 @@ void loadProgram(const char filename[], bool debug  ) {
 
         printf("Ninja Virtual Machine started\n");
 
-        /* performs one step after another till user writes "run" represented by commands[5] */
+        /* performs one step after another till user writes "run" or "quit" represented by commands[4] and commands[5] */
         while (strcmp(input, commands[5]) != 0) {
 
+            listInstruction(instructions[PC--]);
             printf("DEBUG: inspect, list, breakpoint, step, run, quit?\n");
             scanf("%s", input);
 
@@ -152,11 +153,16 @@ void loadProgram(const char filename[], bool debug  ) {
                         SP_output--;
                     }while (SP_output >= 0);
                     printf(" -- bottom of stack --\n");
-                    listInstruction(instructions[PC--]);
                 }
 
                 /* inspect data */
                 else if(strcmp(input, "data") == 0) {
+                    int i = 0;
+                    while(i < numVars) {
+                        printf("data[%d]: ", i);
+                        printf("%d\n", staticDataArea[i++]);
+                    }
+                    printf("   ---  end of data   ---\n");
                 }
                 continue;
             }
@@ -169,7 +175,6 @@ void loadProgram(const char filename[], bool debug  ) {
                 listProgram(instructions,instrSize);
                 PC = temp;
                 printf(" --- end of list ---\n");
-                listInstruction(instructions[--PC]);
                 continue;
             }
 
@@ -398,12 +403,11 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
 }
 
 /*
- * pls add description
+ * executes n commands depending on the size of 'steps'
  */
 void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
     while (instructions[PC] != HALT && steps != 0) {
         execInstruction(instructions[PC], staticDataArea_size);
-        listInstruction(instructions[PC--]);
         steps--;
     }
 }
