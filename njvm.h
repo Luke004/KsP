@@ -8,7 +8,7 @@
 #define DEBUG_MODE "--debug"
 
 /* VM Version Info */
-#define NJVM_VERSION 3
+#define NJVM_VERSION 4
 
 /*make boolean type */
 typedef int bool;
@@ -41,6 +41,12 @@ typedef int bool;
 #define JMP 23
 #define BRF 24
 #define BRT 25
+#define CALL 26
+#define RET  27
+#define DROP 28
+#define PUSHR 29
+#define POPR 30
+#define DUP 31
 
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))

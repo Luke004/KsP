@@ -58,7 +58,7 @@ void printHelp(void)
 }
 
 void loadProgram(const char filename[], bool debug  ) {
-    FILE *program = fopen("/home/lukas/Desktop/KsP/KsP/prog1.bin", "r");   /*"r" for reading */
+    FILE *program = fopen(filename, "r");   /*"r" for reading */
     char *format;
     char *expectedString = "NJBF";
     int version;
@@ -419,6 +419,35 @@ void listInstruction(unsigned int instruction){
             PC++;
             break;
         }
+        case CALL:
+        {
+            printf("CALL %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }case RET:
+        {
+            printf("BRT \n");
+            PC++;
+            break;
+        }
+        case DROP:
+        {
+            printf("DROP %d\n", (SIGN_EXTEND(instruction & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case PUSHR:
+        {
+            printf("BRT \n");
+            PC++;
+            break;
+        }
+        case POPR:
+        {
+            printf("BRT \n");
+            PC++;
+            break;
+        }
         default:
         {
             printf("Not defined!");
@@ -731,6 +760,36 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
                 perror("No valid input for boolean (has to be '0' or '1'\n");
                 PC++;
             }
+            break;
+        }
+        case CALL:
+        {
+            int n = opcode(instruction_binary);
+            push(PC + 1);
+            PC = n;
+            break;
+        }case RET:
+        {
+            int n = pop();
+            PC = n;
+            break;
+        }
+        case DROP:
+        {
+            printf("DROP %d\n", (SIGN_EXTEND(instruction_binary & 0x00FFFFFF)));
+            PC++;
+            break;
+        }
+        case PUSHR:
+        {
+            printf("BRT \n");
+            PC++;
+            break;
+        }
+        case POPR:
+        {
+            printf("BRT \n");
+            PC++;
             break;
         }
         default:
