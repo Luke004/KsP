@@ -111,6 +111,7 @@ void loadProgram(const char filename[], bool debug  ) {
     if (debug == true) {
         char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
         char *input = (char*) malloc(12);
+        int breakpoint = -1;
         printf("DEBUG: file %s loaded ", filename);
         printf("(code size = %d, ", instrSize);
         printf("data size = %d)\n", numVars);
@@ -180,6 +181,31 @@ void loadProgram(const char filename[], bool debug  ) {
 
             /* breakpoint */
             if (strcmp(input, commands[2]) == 0) {
+                if(breakpoint == -1)
+                    printf("DEBUG [breakpoint]: cleared\n");
+                else {
+                    printf("DEBUG [breakpoint]: %d\n", breakpoint);
+                }
+                printf("DEBUG [breakpoint]: address to set, -1 to clear, <ret> for no change?\n");
+                scanf("%s", input);
+                int test = strtol(input, NULL,10);
+                while(test == 0 && strcmp(input, "ret") != 0){
+                    printf("Invalid command, try again!\n");
+                    scanf("%s", input);
+                    test = strtol(input, NULL, 10);
+                }
+                if(strcmp(input, "ret") == 0){
+                    printf("DEBUG: no changes made\n", filename);
+                    continue;
+                } else {
+                    if(test == -1){
+                        breakpoint = test;
+                        printf("DEBUG [breakpoint]: cleared\n");
+                    } else {
+                        breakpoint = test;
+                        printf("DEBUG [breakpoint]: now set at %d\n", breakpoint);
+                    }
+                }
                 continue;
             }
 
@@ -191,10 +217,18 @@ void loadProgram(const char filename[], bool debug  ) {
 
             /* run      */
             else if (strcmp(input, commands[4]) == 0) {
-                executeProgram(instructions, numVars);
-                fclose(program);
-                printf("Ninja Virtual Machine stopped\n");
-                exit(EXIT_SUCCESS);
+                /*if no breakpoint was set */
+                if(breakpoint == -1) {
+                    executeProgram(instructions, numVars);
+                    fclose(program);
+                    printf("Ninja Virtual Machine stopped\n");
+                    exit(EXIT_SUCCESS);
+                } else if(breakpoint > 0) {
+                    makeDebugStep(instructions, numVars, breakpoint - PC);
+                } else {
+                    printf("DEBUG [breakpoint]: set below zero, please set it above zero to continue!\n");
+                }
+
             }
         }
     }
