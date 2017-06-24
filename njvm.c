@@ -2,16 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include "njvm.h"
+#include "bigint/bigint.h"
+#include "bigint/bigint.c"
+#include "bigint/support.h"
 
-
-
-int stack [STACK_SIZE]; /*stack */
+StackSlot stack [STACK_SIZE]; /*stack */
 int PC; /*program counter */
 int SP; /*stack pointer */
 int FP; /*frame pointer */
-int *staticDataArea; /*static data area (holds global vars) */
+StackSlot *staticDataArea; /*static data area (holds global vars) */
 ReturnRegister returnRegister; /*return value register (holds method return values) */
-int RP; /*return register pointer */
 
 
 int main(int argc, char *argv [])
@@ -72,7 +72,7 @@ void loadProgram(const char filename[], bool debug  ) {
 
     /* return if program does not exist */
     if (program == NULL) {
-        perror("File not found! ");
+        printf("File not found! ");
         exit(EXIT_FAILURE);
     }
 
@@ -80,14 +80,14 @@ void loadProgram(const char filename[], bool debug  ) {
     format = (char *) malloc(4);
     fread(format, 1, 4, program);
     if (strcmp(format, expectedString) != 0) {
-        perror("Incorrect Format!\n");
+        printf("Incorrect Format!\n");
         exit(EXIT_FAILURE);
     }
 
     /*Read next 4 bytes and check them for correct Version */
     fread(&version, 4, 1, program);
     if (version > NJVM_VERSION) {
-        perror("Your Version is too old!\n");
+        printf("Your Version is too old!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -97,7 +97,7 @@ void loadProgram(const char filename[], bool debug  ) {
 
     /*Read next 4 bytes and check for the number of vars in static data area*/
     fread(&numVars, 4, 1, program);
-    staticDataArea = (int *) malloc(numVars * sizeof(int));
+    staticDataArea =  malloc(numVars * sizeof(int));
 
     /*Read the next 4 bytes n times (based on instrSize) */
     i = 0;
@@ -109,12 +109,11 @@ void loadProgram(const char filename[], bool debug  ) {
 
     PC = 0;
     SP = 0;
-    RP = 0;
 
     if (debug == true) {
         char *commands[6] = {"inspect", "list", "breakpoint", "step", "run", "quit"};
         char *input = (char*) malloc(12);
-        int breakpoint = -1;
+        long int breakpoint = -1;
         printf("DEBUG: file %s loaded ", filename);
         printf("(code size = %d, ", instrSize);
         printf("data size = %d)\n", numVars);
@@ -138,21 +137,29 @@ void loadProgram(const char filename[], bool debug  ) {
                 if(strcmp(input, "stack") == 0) {
                     int SP_output = SP;
                     if(FP == SP){
-                        printf("FP, SP --> [%d]: xxx\n",SP_output);
+                        printf("FP, SP --> [%d]: (xxxxxx) xxxxxx\n",SP_output);
                         SP_output--;
                     }
                     else {
-                        printf("SP   -->   [%d]: xxx\n", SP_output);
+                        printf("SP   -->   [%d]: (xxxxxx) xxxxxx\n", SP_output);
                         SP_output--;
                     }
                     do{
                         if(FP == SP_output) {
                             printf("FP    -->  [%d]: ", FP);
-                            printf("%d\n", stack[FP]);
+                            if(stack[SP_output].isObjRef == true){
+                                printf("(objref) %p\n", &stack[FP].u.objRef);
+                            } else if(stack[SP_output].isObjRef == false){
+                                printf("(number) %d\n", stack[FP].u.number);
+                            }
                         }
                         else if(SP_output >= 0){
                             printf("           [%d]: ", SP_output);
-                            printf("%d\n", stack[SP_output]);
+                            if(stack[SP_output].isObjRef == true){
+                                printf("(objref) %p\n", &stack[SP_output].u.objRef);
+                            } else if(stack[SP_output].isObjRef == false){
+                                printf("(number) %d\n", stack[SP_output].u.number);
+                            }
                         }
                         SP_output--;
                     }while (SP_output >= 0);
@@ -161,10 +168,10 @@ void loadProgram(const char filename[], bool debug  ) {
 
                 /* inspect data */
                 else if(strcmp(input, "data") == 0) {
-                    int i = 0;
-                    while(i < numVars) {
-                        printf("data[%d]: ", i);
-                        printf("%d\n", staticDataArea[i++]);
+                    int a = 0;
+                    while(a < numVars) {
+                        printf("data[%d]: ", a);
+                        printf("%d\n", staticDataArea[a++]);
                     }
                     printf("   ---  end of data   ---\n");
                 }
@@ -187,18 +194,18 @@ void loadProgram(const char filename[], bool debug  ) {
                 if(breakpoint == -1)
                     printf("DEBUG [breakpoint]: cleared\n");
                 else {
-                    printf("DEBUG [breakpoint]: %d\n", breakpoint);
+                    printf("DEBUG [breakpoint]: %d\n", (int) breakpoint);
                 }
                 printf("DEBUG [breakpoint]: address to set, -1 to clear, <ret> for no change?\n");
                 scanf("%s", input);
-                int test = strtol(input, NULL,10);
+                long int test = strtol(input, NULL,10);
                 while(test == 0 && strcmp(input, "ret") != 0){
                     printf("Invalid command, try again!\n");
                     scanf("%s", input);
                     test = strtol(input, NULL, 10);
                 }
                 if(strcmp(input, "ret") == 0){
-                    printf("DEBUG: no changes made\n", filename);
+                    printf("DEBUG: no changes made\n");
                     continue;
                 } else {
                     if(test == -1){
@@ -206,7 +213,7 @@ void loadProgram(const char filename[], bool debug  ) {
                         printf("DEBUG [breakpoint]: cleared\n");
                     } else {
                         breakpoint = test;
-                        printf("DEBUG [breakpoint]: now set at %d\n", breakpoint);
+                        printf("DEBUG [breakpoint]: now set at %d\n", (int) breakpoint);
                     }
                 }
                 continue;
@@ -227,7 +234,7 @@ void loadProgram(const char filename[], bool debug  ) {
                     printf("Ninja Virtual Machine stopped\n");
                     exit(EXIT_SUCCESS);
                 } else if(breakpoint > 0) {
-                    makeDebugStep(instructions, numVars, breakpoint - PC);
+                    makeDebugStep(instructions, numVars, (int) breakpoint - PC);
                 } else {
                     printf("DEBUG [breakpoint]: set below zero, please set it above zero to continue!\n");
                 }
@@ -250,7 +257,7 @@ void loadProgram(const char filename[], bool debug  ) {
 
 
 /*
- * prints all instructions in programm
+ * prints all instructions in program
  */
 void listProgram(unsigned int instructions [], int instrSize){
 
@@ -471,7 +478,7 @@ void executeProgram(unsigned int instructions [], int staticDataArea_size){
 /*
  * executes n commands depending on the size of 'steps'
  */
-void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps) {
+void makeDebugStep(unsigned int instructions [], int staticDataArea_size, long int steps) {
     while (instructions[PC] != HALT && steps != 0) {
         execInstruction(instructions[PC], staticDataArea_size);
         steps--;
@@ -485,51 +492,63 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
     switch(instruction_binary >> 24){
         case PUSHC:
         {
-            push(opcode(instruction_binary));
+            StackSlot slot;
+            slot.isObjRef = true;
+            bigFromInt(immediate_value(instruction_binary));
+            slot.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            slot.u.objRef->size = sizeof(int);
+            slot.u.objRef = bip.res;
+            push(slot);
             PC++;
             break;
         }
         case ADD:
         {
-            int add_num1 = pop();
-            int add_num2 = pop();
-            int sum;
-            sum = add_num2 + add_num1;
+            StackSlot sum;
+            sum.isObjRef = true;
+            sum.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            sum.u.objRef->size = sizeof(int);
+            *(int*)sum.u.objRef->data = *(int*)popObjRef()->data + *(int*) popObjRef()->data;
             push(sum);
             PC++;
             break;
-
         }
         case SUB:
         {
-            int diff_num1 = pop();
-            int diff_num2 = pop();
-            int diff;
-            diff = diff_num2 - diff_num1;
+            StackSlot diff;
+            ObjRef sub_1 = popObjRef();
+            ObjRef sub_2 = popObjRef();
+            diff.isObjRef = true;
+            diff.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            diff.u.objRef->size = sizeof(int);
+            *(int*)diff.u.objRef->data = *(int*)sub_2->data - *(int*) sub_1->data;
             push(diff);
             PC++;
             break;
         }
         case MUL:
         {
-            int prod_num1 = pop();
-            int prod_num2 = pop();
-            int prod;
-            prod = prod_num2 * prod_num1;
-            push(prod);
+            StackSlot mul;
+            mul.isObjRef = true;
+            mul.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            mul.u.objRef->size = sizeof(int);
+            *(int*)mul.u.objRef->data = *(int*)popObjRef()->data * *(int*) popObjRef()->data;
+            push(mul);
             PC++;
             break;
         }
         case DIV:
         {
-            int quo_num1 = pop ();
-            int quo_num2 = pop ();
-            if(quo_num1 == 0){
-                perror("You are trying to divide with '0', operation aborted!\n");
+            StackSlot quo;
+            ObjRef quo_1 = popObjRef();
+            quo.isObjRef = true;
+            quo.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            quo.u.objRef->size = sizeof(int);
+            if(*(int*)quo_1->data == 0){
+                printf("You are trying to divide with '0', operation aborted!\n");
             }
             else {
-                int quo;
-                quo = quo_num2 / quo_num1;
+                *(int*)quo.u.objRef->data = *(int*)popObjRef()->data / *(int*)quo_1->data;
                 push(quo);
             }
             PC++;
@@ -537,19 +556,28 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         }
         case MOD:
         {
-            int mod_num1 = pop();
-            int mod_num2 = pop();
-            int mod;
-            mod = mod_num2 % mod_num1;
-            push(mod);
+            StackSlot mod;
+            ObjRef mod_1 = popObjRef();
+            mod.isObjRef = true;
+            mod.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            mod.u.objRef->size = sizeof(int);
+            if(*(int*)mod_1->data == 0){
+                printf("You are trying to mod with '0', operation aborted!\n");
+            }
+            else {
+                *(int*)mod.u.objRef->data = *(int*)popObjRef()->data % *(int*)mod_1->data;
+                push(mod);
+            }
             PC++;
             break;
         }
         case RDINT:
         {
-            int num;
-            printf("Please enter an integer number: \n");
-            scanf("%d",&num);
+            StackSlot num;
+            num.isObjRef = true;
+            num.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            num.u.objRef->size = sizeof(int);
+            scanf("%d",(int*)num.u.objRef->data);
             push(num);
             PC++;
             break;
@@ -557,34 +585,37 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         }
         case WRINT:
         {
-            int num = pop();
-            printf("%d\n",num);
+            ObjRef num = popObjRef();
+            printf("%d\n",*(int*)num->data);
             PC++;
             break;
 
         }
         case RDCHR:
         {
-            char character;
-            printf("Please enter a character ascii code: \n");
-            scanf("%c",&character);
-            push(character);
+            StackSlot ch;
+            ch.isObjRef = true;
+            ch.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            ch.u.objRef->size = sizeof(int);
+            scanf("%c",(char*)ch.u.objRef->data);
+            push(ch);
             PC++;
             break;
 
         }
         case WRCHR:
         {
-            int c = pop();
-            printf("%c",c);
+            ObjRef ch = popObjRef();
+            printf("%c",*(unsigned char*)ch->data);
             PC++;
             break;
         }
         case PUSHG:
         {
-            int n = opcode(instruction_binary);
+            int n = immediate_value(instruction_binary);
+
             if(n >= staticDataArea_size || n < 0){
-                perror("Out of bounds. You're not pointing to an index within the static data area!\n");
+                printf("Out of bounds. You're not pointing to an index within the static data area!\n");
             }
             else {
                 push(staticDataArea[n]);
@@ -594,26 +625,31 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         }
         case POPG:
         {
-            int n = opcode(instruction_binary);
+            int n = immediate_value(instruction_binary);
             if(n >=  staticDataArea_size || n < 0){
-                perror("Out of bounds. You're not pointing to an index within the static data area!\n");
+                printf("Out of bounds. You're not pointing to an index within the static data area!\n");
             }
             else {
-                int val = pop();
-                staticDataArea[n] = val;
+                StackSlot slot;
+                slot.isObjRef = true;
+                slot.u.objRef = popObjRef();
+                staticDataArea[n] = slot;
             }
             PC++;
             break;
         }
         case ASF:
         {
-            int n = opcode(instruction_binary);
+            int n = immediate_value(instruction_binary);
             if(n > STACK_SIZE - 2){
-                perror("Stack is too small to hold this stack frame!\n");
+                printf("Stack is too small to hold this stack frame!\n");
             } else if (n <= 0){
-                perror("Cannot create a stack frame smaller than 1!\n");
+                printf("Cannot create a stack frame smaller than 1!\n");
             } else {
-                push(FP);
+                StackSlot slot;
+                slot.isObjRef = false;
+                slot.u.number = FP;
+                push(slot);
                 FP = SP;
                 SP = SP + n; /*allocate new stack frame on stack by size 'n' */
             }
@@ -623,161 +659,183 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         case RSF:
         {
             SP = FP;
-            FP = pop();
+            FP = popNumber();
             PC++;
             break;
         }
         case PUSHL:
         {
-            int n = opcode(instruction_binary);
+            int n = immediate_value(instruction_binary);
             push(stack[FP + n]);
             PC++;
             break;
         }
         case POPL:
         {
-            int val = pop();
-            stack[FP + opcode(instruction_binary)] = val;
+            StackSlot val;
+            val.isObjRef = true;
+            val.u.objRef= popObjRef();
+            stack[FP + immediate_value(instruction_binary)] = val;
             PC++;
             break;
         }
         case EQ:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 == num1){
-                push(1);
+            StackSlot eq;
+            eq.isObjRef = true;
+
+            if(*(int*)popObjRef()->data == *(int*)popObjRef()->data){
+                *(int*)eq.u.objRef->data = 1;
+                push(eq);
             }
             else
             {
-                push(0);
+                *(int*)eq.u.objRef->data = 0;
+                push(eq);
             }
             PC++;
             break;
         }
         case NE:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 != num1){
-                push(1);
+            StackSlot ne;
+            ne.isObjRef = true;
+
+            if(*(int*)popObjRef()->data != *(int*)popObjRef()->data){
+                *(int*)ne.u.objRef->data = 1;
+                push(ne);
             }
             else
             {
-                push(0);
+                *(int*)ne.u.objRef->data = 0;
+                push(ne);
             }
             PC++;
             break;
         }
         case LT:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 < num1){
-                push(1);
+            StackSlot lt;
+            lt.isObjRef = true;
+
+            if(*(int*)popObjRef()->data < *(int*)popObjRef()->data){
+                *(int*)lt.u.objRef->data = 1;
+                push(lt);
             }
             else
             {
-                push(0);
+                *(int*)lt.u.objRef->data = 0;
+                push(lt);
             }
             PC++;
             break;
         }
         case LE:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 <= num1){
-                push(1);
+            StackSlot le;
+            le.isObjRef = true;
+
+            if(*(int*)popObjRef()->data <= *(int*)popObjRef()->data){
+                *(int*)le.u.objRef->data = 1;
+                push(le);
             }
             else
             {
-                push(0);
+                *(int*)le.u.objRef->data = 0;
+                push(le);
             }
             PC++;
             break;
         }
         case GT:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 > num1){
-                push(1);
+            StackSlot gt;
+            gt.isObjRef = true;
+
+            if(*(int*)popObjRef()->data > *(int*)popObjRef()->data){
+                *(int*)gt.u.objRef->data = 1;
+                push(gt);
             }
             else
             {
-                push(0);
+                *(int*)gt.u.objRef->data = 0;
+                push(gt);
             }
             PC++;
             break;
         }
         case GE:
         {
-            int num1 = pop();
-            int num2 = pop();
-            if(num2 >= num1){
-                push(1);
+            StackSlot ge;
+            ge.isObjRef = true;
+
+            if(*(int*)popObjRef()->data >= *(int*)popObjRef()->data){
+                *(int*)ge.u.objRef->data = 1;
+                push(ge);
             }
             else
             {
-                push(0);
+                *(int*)ge.u.objRef->data = 0;
+                push(ge);
             }
             PC++;
             break;
         }
         case JMP:
         {
-            PC = opcode(instruction_binary);;
+            PC = immediate_value(instruction_binary);;
             break;
         }
         case BRF:
         {
-            int jump = pop();
-            if(jump == 0){
-                PC = opcode(instruction_binary);;
+            ObjRef jump = popObjRef();
+            if(*(int*)jump->data == 0){
+                PC = immediate_value(instruction_binary);;
             }
-            else if(jump == 1){
+            else if(*(int*)jump->data == 1){
                 PC++;
             }
             else {
-                perror("No valid input for boolean (has to be '0' or '1'\n");
+                printf("No valid input for boolean (has to be '0' or '1'\n");
                 PC++;
             }
             break;
         }
         case BRT:
         {
-            int jump = pop();
-            if(jump == 1){
-                PC = opcode(instruction_binary);
+            ObjRef jump = popObjRef();
+            if(*(int*)jump->data == 1){
+                PC = immediate_value(instruction_binary);
             }
-            else if (jump == 0){
+            else if (*(int*)jump->data == 0){
                 PC++;
             }
             else {
-                perror("No valid input for boolean (has to be '0' or '1'\n");
+                printf("No valid input for boolean (has to be '0' or '1'\n");
                 PC++;
             }
             break;
         }
         case CALL:
         {
-            int n = opcode(instruction_binary);
-            push(PC + 1);
-            PC = n;
+            StackSlot slot;
+            slot.isObjRef = false;
+            slot.u.number = PC + 1;
+            push(slot);
+            PC = immediate_value(instruction_binary);
             break;
         }case RET:
         {
-            int n = pop();
+            int n = popNumber();
             PC = n;
             break;
         }
         case DROP:
         {
-            int n = opcode(instruction_binary);
+            int n = immediate_value(instruction_binary);
             int i = 0;
             while(i < n){
-                pop();
+                popObjRef();
                 i++;
             }
             PC++;
@@ -785,13 +843,18 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
         }
         case PUSHR:
         {
-            push(returnRegister.this[--returnRegister.size]);
+            StackSlot slot;
+            slot.isObjRef = true;
+            slot.u.objRef = malloc(sizeof(unsigned int) + sizeof(int));
+            slot.u.objRef->size = sizeof(int);
+            slot.u.objRef = returnRegister.this[--returnRegister.size];
+            push(slot);
             PC++;
             break;
         }
         case POPR:
         {
-            returnRegister.this[returnRegister.size++] = pop();
+            returnRegister.this[returnRegister.size++] = popObjRef();
             PC++;
             break;
         }
@@ -800,28 +863,58 @@ void execInstruction(unsigned int instruction_binary, int staticDataArea_size){
             printf("Not defined!\n");
             PC++;
         }
-
-
     }
 }
 
-void push(int number){
+void push(StackSlot slot){
     if(SP > STACK_SIZE - 1){
-        perror("Stack is full, push cannot be performed!\n");
+        printf("Stack is full, push cannot be performed!\n");
     }
         else if(SP < 0){
-        perror("Stack pointer is below zero, push cannot be performed!\n");
+        printf("Stack pointer is below zero, push cannot be performed!\n");
     }
-
-    else {
-        stack[SP++] = number;
+        else {
+        stack[SP++] = slot;
     }
 }
 
-int pop (){
-    return stack[--SP];
+ObjRef popObjRef (){
+    StackSlot slot;
+    if(SP > 0){
+        slot = stack[--SP];
+    } else {
+        printf("Stack is empty, nothing to pop!\n");
+    }
+    return slot.u.objRef;
 }
 
-int opcode(int binary) {
+int popNumber(){
+    StackSlot slot;
+    if(SP > 0){
+        slot = stack[--SP];
+    } else {
+        printf("Stack is empty, nothing to pop!\n");
+    }
+    return slot.u.number;
+}
+
+int immediate_value(unsigned int binary) {
     return (SIGN_EXTEND(binary & 0x00FFFFFF));
 }
+
+void fatalError(char* msg) {
+    printf("Fatal Error: %s", msg);
+    exit(102);
+}
+
+ObjRef newPrimObject(int dataSize) {
+    ObjRef objRef = malloc(sizeof(unsigned int) + dataSize * sizeof(unsigned char));
+
+    if(objRef == NULL)
+        fatalError("Memory allocation for new prim object failed!\n");
+
+    objRef->size = dataSize;
+
+    return objRef;
+}
+

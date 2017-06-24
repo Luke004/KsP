@@ -1,18 +1,17 @@
+#include "bigint/bigint.h"
+
 /* Define Arguments */
 
 #define ARG_VERSION "--version"
 #define ARG_HELP "--help"
-#define ARG_PROG1 "--prog1"
-#define ARG_PROG2 "--prog2"
-#define ARG_PROG3 "--prog3"
 #define DEBUG_MODE "--debug"
 
-#define IMMEDIATE(x) ((x) & 0x00FFFFFF)
+/* #define IMMEDIATE(x) ((x) & 0x00FFFFFF) */
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define STACK_SIZE 10000
 
 /* VM Version Info */
-#define NJVM_VERSION 4
+#define NJVM_VERSION 5
 
 /*make boolean type */
 typedef int bool;
@@ -20,7 +19,16 @@ typedef int bool;
 #define false 0
 
 typedef struct {
-    int this[STACK_SIZE];
+    bool isObjRef;
+    union
+    {
+        ObjRef objRef;
+        int number;
+    } u;
+} StackSlot;
+
+typedef struct {
+    ObjRef this[STACK_SIZE];
     int size;
 } ReturnRegister;
 
@@ -66,7 +74,8 @@ void listProgram(unsigned int prog [], int instrSize);
 void executeProgram(unsigned int instructions [], int staticDataArea_size);
 void execInstruction(unsigned int instruction_binary, int staticDataArea_size);
 void listInstruction(unsigned int instruction);
-void makeDebugStep(unsigned int instructions [], int staticDataArea_size, int steps);
-int opcode(int binary);
-void push(int number);
-int pop();
+void makeDebugStep(unsigned int instructions [], int staticDataArea_size, long int steps);
+int immediate_value(unsigned int binary);
+void push(StackSlot slot);
+ObjRef popObjRef();
+int popNumber();
